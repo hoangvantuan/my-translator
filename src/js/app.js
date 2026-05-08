@@ -1394,9 +1394,9 @@ class App {
         const iconPlay = document.getElementById('icon-play');
         const iconStop = document.getElementById('icon-stop');
 
-        btn.classList.toggle('recording', this.isRunning);
-        iconPlay.style.display = this.isRunning ? 'none' : 'block';
-        iconStop.style.display = this.isRunning ? 'block' : 'none';
+        if (btn) btn.classList.toggle('recording', this.isRunning);
+        if (iconPlay) iconPlay.style.display = this.isRunning ? 'none' : 'block';
+        if (iconStop) iconStop.style.display = this.isRunning ? 'block' : 'none';
 
         const idleOverlay = document.getElementById('idle-overlay');
         const overlayView = document.getElementById('overlay-view');
