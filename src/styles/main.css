@@ -314,13 +314,15 @@ body {
   border-radius: var(--radius-lg);
   z-index: 50;
   opacity: 0;
+  visibility: hidden;
   pointer-events: none;
-  transition: opacity var(--transition-fast), transform var(--transition-fast);
+  transition: opacity var(--transition-fast), visibility var(--transition-fast), transform var(--transition-fast);
   transform: translateX(-50%) translateY(4px);
 }
 
 #overlay-view.toolbar-visible .floating-toolbar {
   opacity: 1;
+  visibility: visible;
   pointer-events: auto;
   transform: translateX(-50%) translateY(0);
 }
