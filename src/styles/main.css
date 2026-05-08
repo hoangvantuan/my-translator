@@ -304,15 +304,14 @@ body {
 
 .floating-toolbar {
   position: absolute;
-  top: -46px;
+  bottom: calc(100% + 6px);
   left: 50%;
   display: flex;
   align-items: center;
   gap: var(--toolbar-gap-item);
   padding: var(--toolbar-padding);
-  background: var(--bg-toolbar);
+  background: transparent;
   border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-toolbar);
   z-index: 50;
   opacity: 0;
   pointer-events: none;
@@ -328,9 +327,9 @@ body {
 
 .toolbar-separator {
   width: 1px;
-  height: 20px;
-  background: var(--border-light);
-  margin: 0 4px;
+  height: 16px;
+  background: rgba(0, 0, 0, 0.08);
+  margin: 0 2px;
   flex-shrink: 0;
 }
 
