@@ -193,8 +193,8 @@ body {
   position: absolute;
   top: 8px;
   right: 10px;
-  width: 10px;
-  height: 10px;
+  width: 8px;
+  height: 8px;
   border-radius: 50%;
   z-index: 5;
   transition: background var(--transition-normal);
@@ -279,13 +279,13 @@ body {
 }
 
 .idle-start-btn {
-  padding: 8px 24px;
+  padding: 14px 40px;
   border: none;
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-lg);
   background: var(--accent);
   color: #fff;
-  font-size: 13px;
-  font-weight: 500;
+  font-size: 16px;
+  font-weight: 600;
   cursor: pointer;
   transition: all var(--transition-fast);
   -webkit-app-region: no-drag;
