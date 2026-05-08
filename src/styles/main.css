@@ -133,13 +133,7 @@ body {
   display: flex;
   align-items: center;
   gap: 6px;
-  opacity: 0;
-  transition: opacity var(--transition-fast);
   z-index: 10;
-}
-
-#overlay-view:hover .window-controls {
-  opacity: 1;
 }
 
 .wc-btn {
@@ -317,6 +311,15 @@ body {
   pointer-events: none;
   transition: opacity var(--transition-fast), transform var(--transition-fast);
   transform: translateX(-50%) translateY(4px);
+}
+
+.floating-toolbar::after {
+  content: '';
+  position: absolute;
+  bottom: -12px;
+  left: 0;
+  right: 0;
+  height: 12px;
 }
 
 #overlay-view:hover .floating-toolbar {
