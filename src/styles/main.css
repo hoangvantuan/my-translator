@@ -133,7 +133,13 @@ body {
   display: flex;
   align-items: center;
   gap: 6px;
+  opacity: 0;
+  transition: opacity var(--transition-fast);
   z-index: 10;
+}
+
+#overlay-view:hover .window-controls {
+  opacity: 1;
 }
 
 .wc-btn {
@@ -187,8 +193,8 @@ body {
   position: absolute;
   top: 8px;
   right: 10px;
-  width: 5px;
-  height: 5px;
+  width: 10px;
+  height: 10px;
   border-radius: 50%;
   z-index: 5;
   transition: background var(--transition-normal);
@@ -304,7 +310,7 @@ body {
   align-items: center;
   gap: var(--toolbar-gap-item);
   padding: var(--toolbar-padding);
-  background: transparent;
+  background: white;
   border-radius: var(--radius-lg);
   z-index: 50;
   opacity: 0;
@@ -313,16 +319,7 @@ body {
   transform: translateX(-50%) translateY(4px);
 }
 
-.floating-toolbar::after {
-  content: '';
-  position: absolute;
-  bottom: -12px;
-  left: 0;
-  right: 0;
-  height: 12px;
-}
-
-#overlay-view:hover .floating-toolbar {
+#overlay-view.toolbar-visible .floating-toolbar {
   opacity: 1;
   pointer-events: auto;
   transform: translateX(-50%) translateY(0);

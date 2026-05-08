@@ -33,6 +33,7 @@ class App {
         this.ttsEnabled = false;  // TTS runtime toggle
         this.isPinned = true;     // Always-on-top state
         this.isCompact = false;   // Compact mode (hide control bar)
+        this._toolbarHideTimer = null;
     }
 
     async init() {
@@ -54,6 +55,9 @@ class App {
 
         // Bind keyboard shortcuts
         this._bindKeyboardShortcuts();
+
+        // Toolbar show/hide with 5s delay
+        this._bindToolbarHover();
 
         // Subscribe to settings changes
         settingsManager.onChange((settings) => this._applySettings(settings));
@@ -256,6 +260,8 @@ class App {
                     this.isRunning = false;
                     this._updateStartButton();
                     this._updateStatus('error');
+                    this.transcriptUI.clear();
+                    this.transcriptUI.showPlaceholder();
                 } finally {
                     this.isStarting = false;
                 }
@@ -787,7 +793,7 @@ class App {
         const provider = settings.tts_provider || 'edge';
 
         // Block TTS in two-way mode to prevent audio feedback loop
-        const translationType = document.getElementById('select-translation-type')?.value;
+        const translationType = settings.translation_type || 'one_way';
         if (translationType === 'two_way') {
             this._showToast('TTS is disabled in two-way mode to prevent audio loop', 'error');
             return;
@@ -862,8 +868,8 @@ class App {
         if (!list) return;
         const row = document.createElement('div');
         row.className = 'term-row';
-        row.innerHTML = `<input type="text" class="term-source" value="${source}" placeholder="Source" />` +
-            `<input type="text" class="term-target" value="${target}" placeholder="Target" />` +
+        row.innerHTML = `<input type="text" class="term-source" value="${this._escAttr(source)}" placeholder="Source" />` +
+            `<input type="text" class="term-target" value="${this._escAttr(target)}" placeholder="Target" />` +
             `<button type="button" class="btn-remove-term" title="Remove">×</button>`;
         row.querySelector('.btn-remove-term').addEventListener('click', () => row.remove());
         list.appendChild(row);
@@ -936,7 +942,7 @@ class App {
         const btn = document.getElementById('btn-tts');
         const iconOff = document.getElementById('icon-tts-off');
         const iconOn = document.getElementById('icon-tts-on');
-        const isTwoWay = document.getElementById('select-translation-type')?.value === 'two_way';
+        const isTwoWay = (settingsManager.get().translation_type || 'one_way') === 'two_way';
 
         if (btn) {
             btn.classList.toggle('active', this.ttsEnabled);
@@ -1397,6 +1403,7 @@ class App {
         // Stop TTS
         elevenLabsTTS.disconnect();
         edgeTTSRust.disconnect();
+        googleTTS.disconnect();
 
         audioPlayer.stop();
 
@@ -1567,6 +1574,29 @@ class App {
             dragRegion.classList.remove('compact-hidden');
             overlay.classList.remove('compact-mode');
         }
+    }
+
+    _bindToolbarHover() {
+        const overlay = document.getElementById('overlay-view');
+        const toolbar = document.querySelector('.floating-toolbar');
+        if (!overlay || !toolbar) return;
+
+        const show = () => {
+            clearTimeout(this._toolbarHideTimer);
+            overlay.classList.add('toolbar-visible');
+        };
+
+        const scheduleHide = () => {
+            clearTimeout(this._toolbarHideTimer);
+            this._toolbarHideTimer = setTimeout(() => {
+                overlay.classList.remove('toolbar-visible');
+            }, 5000);
+        };
+
+        overlay.addEventListener('mouseenter', show);
+        toolbar.addEventListener('mouseenter', show);
+        overlay.addEventListener('mouseleave', scheduleHide);
+        toolbar.addEventListener('mouseleave', scheduleHide);
     }
 
     _toggleViewMode() {
