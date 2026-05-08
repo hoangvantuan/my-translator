@@ -239,7 +239,7 @@ body {
 
 .floating-toolbar {
   position: absolute;
-  top: -52px;
+  top: 4px;
   left: 50%;
   display: flex;
   align-items: center;
@@ -252,10 +252,10 @@ body {
   opacity: 0;
   pointer-events: none;
   transition: opacity var(--transition-fast), transform var(--transition-fast);
-  transform: translateX(-50%) translateY(4px);
+  transform: translateX(-50%) translateY(-4px);
 }
 
-#overlay-view.is-recording:hover .floating-toolbar {
+#overlay-view:hover .floating-toolbar {
   opacity: 1;
   pointer-events: auto;
   transform: translateX(-50%) translateY(0);
@@ -609,7 +609,7 @@ body {
   transition: opacity 0.2s;
 }
 
-#overlay-view.is-recording:hover .floating-controls {
+#overlay-view:hover .floating-controls {
   opacity: 1;
 }
 
