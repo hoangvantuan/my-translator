@@ -123,6 +123,70 @@ body {
   background: rgba(0, 0, 0, 0.2);
 }
 
+/* Window Controls (macOS-style dots) */
+.window-controls {
+  position: absolute;
+  left: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  opacity: 0;
+  transition: opacity var(--transition-fast);
+  z-index: 10;
+}
+
+#overlay-view:hover .window-controls {
+  opacity: 1;
+}
+
+.wc-btn {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  -webkit-app-region: no-drag;
+  transition: all var(--transition-fast);
+}
+
+.wc-btn svg {
+  opacity: 0;
+  transition: opacity var(--transition-fast);
+}
+
+.window-controls:hover .wc-btn svg {
+  opacity: 1;
+}
+
+.wc-close {
+  background: #ff5f57;
+  color: #4a0002;
+}
+
+.wc-minimize {
+  background: #febc2e;
+  color: #5a3e00;
+}
+
+.wc-fullscreen {
+  background: #28c840;
+  color: #003a00;
+}
+
+.wc-close:hover { background: #ff3b30; }
+.wc-minimize:hover { background: #f5a623; }
+.wc-fullscreen:hover { background: #1aad2e; }
+
+.wc-btn:active {
+  transform: scale(0.85);
+}
+
 /* Status dot (top right) */
 #overlay-view > .status-dot {
   position: absolute;

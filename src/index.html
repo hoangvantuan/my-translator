@@ -16,6 +16,23 @@
   <div id="overlay-view" class="view active">
     <!-- Drag handle (top center) -->
     <div id="drag-region" data-tauri-drag-region>
+      <div class="window-controls">
+        <button id="btn-wc-close" class="wc-btn wc-close" title="Close">
+          <svg width="6" height="6" viewBox="0 0 6 6" fill="none">
+            <path d="M0.5 0.5L5.5 5.5M5.5 0.5L0.5 5.5" stroke="currentColor" stroke-width="1.2"/>
+          </svg>
+        </button>
+        <button id="btn-wc-minimize" class="wc-btn wc-minimize" title="Minimize">
+          <svg width="6" height="2" viewBox="0 0 6 2" fill="none">
+            <line x1="0.5" y1="1" x2="5.5" y2="1" stroke="currentColor" stroke-width="1.2"/>
+          </svg>
+        </button>
+        <button id="btn-wc-fullscreen" class="wc-btn wc-fullscreen" title="Fullscreen">
+          <svg width="6" height="6" viewBox="0 0 6 6" fill="none">
+            <path d="M0.5 3.5V5.5H2.5M5.5 2.5V0.5H3.5" stroke="currentColor" stroke-width="1"/>
+          </svg>
+        </button>
+      </div>
       <div class="drag-handle" data-tauri-drag-region></div>
     </div>
 
@@ -181,8 +198,6 @@
       <button id="btn-clear"></button>
       <button id="btn-open-transcripts"></button>
       <button id="btn-compact"></button>
-      <button id="btn-minimize"></button>
-      <button id="btn-close"></button>
     </div>
 
     <!-- Resize Handle -->

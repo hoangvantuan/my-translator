@@ -150,16 +150,37 @@ class App {
         });
 
         // Close button (overlay)
-        document.getElementById('btn-close').addEventListener('click', async () => {
+        document.getElementById('btn-close')?.addEventListener('click', async () => {
             await this._saveWindowPosition();
             await this.stop();
             await this.appWindow.close();
         });
 
         // Minimize button
-        document.getElementById('btn-minimize').addEventListener('click', async () => {
+        document.getElementById('btn-minimize')?.addEventListener('click', async () => {
             await this._saveWindowPosition();
             await this.appWindow.minimize();
+        });
+
+        // Window control buttons (custom titlebar)
+        document.getElementById('btn-wc-close')?.addEventListener('click', async () => {
+            await this._saveWindowPosition();
+            await this.stop();
+            await this.appWindow.close();
+        });
+
+        document.getElementById('btn-wc-minimize')?.addEventListener('click', async () => {
+            await this._saveWindowPosition();
+            await this.appWindow.minimize();
+        });
+
+        document.getElementById('btn-wc-fullscreen')?.addEventListener('click', async () => {
+            const isMaximized = await this.appWindow.isMaximized();
+            if (isMaximized) {
+                await this.appWindow.unmaximize();
+            } else {
+                await this.appWindow.maximize();
+            }
         });
 
         // Pin/Unpin button
