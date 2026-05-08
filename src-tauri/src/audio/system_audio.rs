@@ -146,9 +146,6 @@ impl SystemAudioCapture {
         self.is_capturing.store(false, Ordering::SeqCst);
     }
 
-    pub fn is_capturing(&self) -> bool {
-        self.is_capturing.load(Ordering::SeqCst)
-    }
 }
 
 impl Default for SystemAudioCapture {

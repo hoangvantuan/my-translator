@@ -4,7 +4,8 @@
   "version": "0.5.3",
   "type": "module",
   "scripts": {
-    "tauri": "tauri"
+    "tauri": "tauri",
+    "build": "TAURI_SIGNING_PRIVATE_KEY_PATH=~/.tauri/my-translator.key tauri build"
   },
   "devDependencies": {
     "@tauri-apps/cli": "^2"

@@ -51,7 +51,7 @@
   },
   "plugins": {
     "updater": {
-      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDQ1MkNFMzAxRUQ2QUY2OEMKUldTTTltcnRBZU1zUmJrb1VIaExodVBLb2JnSjlmL25neWttRlI4clYzSlhPMG1Vd2RQS2ZkNkwK",
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IEVDMDU3Qzg4NEU3OTYyQTQKUldTa1lubE9pSHdGN0hmRnR3TStYUVN1RDJxR1VDNlJpNDZRZThjeUdzQU5FNXJzdCttOGx6VW8K",
       "endpoints": [
         "https://github.com/phuc-nt/my-translator/releases/latest/download/latest.json"
       ]
