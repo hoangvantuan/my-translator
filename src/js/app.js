@@ -177,6 +177,11 @@ class App {
             this._toggleViewMode();
         });
 
+        // View mode toggle (floating controls duplicate)
+        document.getElementById('btn-view-mode-float')?.addEventListener('click', () => {
+            this._toggleViewMode();
+        });
+
         // Font size quick controls
         document.getElementById('btn-font-up').addEventListener('click', () => this._adjustFontSize(4));
         document.getElementById('btn-font-down').addEventListener('click', () => this._adjustFontSize(-4));
@@ -213,6 +218,28 @@ class App {
                 this.isStarting = false;
             }
         });
+
+        // Idle start button (same action as btn-start)
+        const btnIdleStart = document.getElementById('btn-idle-start');
+        if (btnIdleStart) {
+            btnIdleStart.addEventListener('click', async () => {
+                if (this.isStarting) return;
+                try {
+                    if (!this.isRunning) {
+                        this.isStarting = true;
+                        await this.start();
+                    }
+                } catch (err) {
+                    console.error('[App] Idle start error:', err);
+                    this._showToast(`Error: ${err}`, 'error');
+                    this.isRunning = false;
+                    this._updateStartButton();
+                    this._updateStatus('error');
+                } finally {
+                    this.isStarting = false;
+                }
+            });
+        }
 
         // Source buttons
         document.getElementById('btn-source-system').addEventListener('click', () => {
@@ -1370,6 +1397,15 @@ class App {
         btn.classList.toggle('recording', this.isRunning);
         iconPlay.style.display = this.isRunning ? 'none' : 'block';
         iconStop.style.display = this.isRunning ? 'block' : 'none';
+
+        const idleOverlay = document.getElementById('idle-overlay');
+        const overlayView = document.getElementById('overlay-view');
+        if (idleOverlay) {
+            idleOverlay.classList.toggle('hidden', this.isRunning);
+        }
+        if (overlayView) {
+            overlayView.classList.toggle('is-recording', this.isRunning);
+        }
     }
 
     // ─── Transcript Persistence ───────────────────────────────

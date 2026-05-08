@@ -12,137 +12,140 @@
 </head>
 
 <body>
-  <!-- ═══════════════════ OVERLAY VIEW ═══════════════════ -->
+  <!-- OVERLAY VIEW -->
   <div id="overlay-view" class="view active">
-    <!-- Drag Region (title bar area) -->
+    <!-- Drag handle (top center) -->
     <div id="drag-region" data-tauri-drag-region>
-      <div class="control-bar" data-tauri-drag-region>
-        <button id="btn-settings" class="icon-btn" title="Settings">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <circle cx="12" cy="12" r="3" />
-            <path
-              d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" />
-          </svg>
-          <span id="settings-badge" class="settings-badge" style="display:none"></span>
-        </button>
+      <div class="drag-handle" data-tauri-drag-region></div>
+    </div>
 
-        <div class="status-area" data-tauri-drag-region>
-          <span id="status-indicator" class="status-dot disconnected"></span>
-          <span id="status-text" class="status-text">Ready</span>
-        </div>
+    <!-- Status dot (top right corner, visible when translating) -->
+    <div id="status-indicator" class="status-dot disconnected"></div>
 
-        <div class="source-controls">
-          <button id="btn-source-system" class="source-btn active" title="System Audio (⌘1)">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
-              <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07" />
-            </svg>
-          </button>
-          <button id="btn-source-mic" class="source-btn" title="Microphone (⌘2)">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z" />
-              <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
-              <line x1="12" y1="19" x2="12" y2="23" />
-              <line x1="8" y1="23" x2="16" y2="23" />
-            </svg>
-          </button>
-          <button id="btn-source-both" class="source-btn" title="System + Mic (⌘3)">
-            <svg width="16" height="14" viewBox="0 0 28 24" fill="none" stroke="currentColor" stroke-width="2">
-              <polygon points="9 6 5 9 2 9 2 15 5 15 9 18 9 6" />
-              <path d="M12.5 9.5a3 3 0 0 1 0 5" />
-              <path d="M20 4a2.5 2.5 0 0 0-2.5 2.5v5a2.5 2.5 0 0 0 5 0v-5A2.5 2.5 0 0 0 20 4z" />
-              <path d="M25 10v1.5a5 5 0 0 1-10 0V10" />
-            </svg>
-          </button>
-        </div>
+    <!-- Status label (top left, visible on hover when translating) -->
+    <div id="status-label" class="status-label">
+      <span class="status-label-dot"></span>
+      <span id="status-text" class="status-text"></span>
+    </div>
 
-        <button id="btn-start" class="action-btn" title="Start/Stop (Space)">
-          <svg id="icon-play" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-            <polygon points="5 3 19 12 5 21 5 3" />
-          </svg>
-          <svg id="icon-stop" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="display:none">
-            <rect x="4" y="4" width="16" height="16" rx="2" />
+    <!-- Floating toolbar (appears on hover, above content) -->
+    <div id="floating-toolbar" class="floating-toolbar">
+      <!-- Group: Source -->
+      <div class="toolbar-group source-controls">
+        <button id="btn-source-system" class="toolbar-btn source-btn active" title="System Audio (⌘1)">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
+            <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07" />
           </svg>
         </button>
+        <button id="btn-source-mic" class="toolbar-btn source-btn" title="Microphone (⌘2)">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z" />
+            <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
+            <line x1="12" y1="19" x2="12" y2="23" />
+            <line x1="8" y1="23" x2="16" y2="23" />
+          </svg>
+        </button>
+        <button id="btn-source-both" class="toolbar-btn source-btn" title="System + Mic (⌘3)">
+          <svg width="16" height="14" viewBox="0 0 28 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polygon points="9 6 5 9 2 9 2 15 5 15 9 18 9 6" />
+            <path d="M12.5 9.5a3 3 0 0 1 0 5" />
+            <path d="M20 4a2.5 2.5 0 0 0-2.5 2.5v5a2.5 2.5 0 0 0 5 0v-5A2.5 2.5 0 0 0 20 4z" />
+            <path d="M25 10v1.5a5 5 0 0 1-10 0V10" />
+          </svg>
+        </button>
+      </div>
 
-        <button id="btn-tts" class="tts-action-btn" title="TTS Narration (⌘T)">
-          <svg id="icon-tts-off" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+      <div class="toolbar-separator"></div>
+
+      <!-- Group: Display -->
+      <div class="toolbar-group">
+        <button id="btn-tts" class="toolbar-btn" title="TTS Narration (⌘T)">
+          <svg id="icon-tts-off" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
             <line x1="9" y1="10" x2="15" y2="10" />
           </svg>
-          <svg id="icon-tts-on" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="display:none">
+          <svg id="icon-tts-on" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:none">
             <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
             <path d="M9 10h2" /><path d="M13 8v4" /><path d="M15 10h1" />
           </svg>
-          <span class="tts-label">TTS</span>
         </button>
-
-        <div class="toolbar-group">
-          <button id="btn-clear" class="icon-btn" title="Clear transcript">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <polyline points="3 6 5 6 21 6" />
-              <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
-            </svg>
-          </button>
-
-          <button id="btn-copy" class="icon-btn" title="Copy transcript">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
-              <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
-            </svg>
-          </button>
-
-          <button id="btn-open-transcripts" class="icon-btn" title="Open saved transcripts folder">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" />
-            </svg>
-          </button>
-
-          <button id="btn-sessions" class="icon-btn" title="View saved sessions">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <circle cx="12" cy="12" r="10" />
-              <polyline points="12 6 12 12 16 14" />
-            </svg>
-          </button>
-        </div>
-
-        <button id="btn-compact" class="icon-btn" title="Compact mode — hide control bar">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <polyline points="4 14 10 14 10 20" />
-            <polyline points="20 10 14 10 14 4" />
-            <line x1="14" y1="10" x2="21" y2="3" />
-            <line x1="3" y1="21" x2="10" y2="14" />
+        <button id="btn-font-size-toolbar" class="toolbar-btn" title="Font size">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M4 7V4h16v3" /><path d="M9 20h6" /><path d="M12 4v16" />
           </svg>
         </button>
+        <button id="btn-view-mode" class="toolbar-btn" title="Toggle dual view">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="3" width="7" height="18" rx="1" />
+            <rect x="14" y="3" width="7" height="18" rx="1" />
+          </svg>
+        </button>
+      </div>
 
-        <button id="btn-pin" class="icon-btn active" title="Pin on top (always visible)">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <div class="toolbar-separator"></div>
+
+      <!-- Group: Action -->
+      <div class="toolbar-group">
+        <button id="btn-copy" class="toolbar-btn" title="Copy transcript">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+          </svg>
+        </button>
+        <button id="btn-sessions" class="toolbar-btn" title="View saved sessions">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10" />
+            <polyline points="12 6 12 12 16 14" />
+          </svg>
+        </button>
+        <button id="btn-settings" class="toolbar-btn" title="Settings">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="3" />
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" />
+          </svg>
+          <span id="settings-badge" class="settings-badge" style="display:none"></span>
+        </button>
+      </div>
+
+      <div class="toolbar-separator"></div>
+
+      <!-- Group: Control -->
+      <div class="toolbar-group">
+        <button id="btn-start" class="toolbar-btn toolbar-btn-stop" title="Stop (Space)">
+          <svg id="icon-play" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polygon points="5 3 19 12 5 21 5 3" fill="currentColor" />
+          </svg>
+          <svg id="icon-stop" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:none">
+            <rect x="4" y="4" width="16" height="16" rx="2" fill="currentColor" />
+          </svg>
+        </button>
+        <button id="btn-pin" class="toolbar-btn active" title="Pin on top">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M12 17v5" />
             <path d="M9 10.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24V17h14v-1.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V6h1a2 2 0 0 0 0-4H8a2 2 0 0 0 0 4h1v4.76z" />
           </svg>
         </button>
-
-        <button id="btn-minimize" class="icon-btn" title="Minimize to taskbar">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-            <line x1="5" y1="12" x2="19" y2="12" />
-          </svg>
-        </button>
-
-        <button id="btn-close" class="icon-btn close-btn" title="Close">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-            <line x1="18" y1="6" x2="6" y2="18" />
-            <line x1="6" y1="6" x2="18" y2="18" />
-          </svg>
-        </button>
       </div>
+    </div>
+
+    <!-- Idle state overlay (shown when not translating) -->
+    <div id="idle-overlay" class="idle-overlay">
+      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" opacity="0.4">
+        <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z" />
+        <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
+        <line x1="12" y1="19" x2="12" y2="23" />
+        <line x1="8" y1="23" x2="16" y2="23" />
+      </svg>
+      <p class="idle-text">Nhấn ▶ để bắt đầu dịch</p>
+      <button id="btn-idle-start" class="idle-start-btn">Bắt đầu</button>
     </div>
 
     <!-- Transcript Area -->
     <div id="transcript-container" data-tauri-drag-region>
       <div id="transcript-content" data-tauri-drag-region>
         <div class="transcript-placeholder">
-          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
-            opacity="0.4">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" opacity="0.4">
             <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z" />
             <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
             <line x1="12" y1="19" x2="12" y2="23" />
@@ -153,7 +156,7 @@
       </div>
     </div>
 
-    <!-- Floating controls (bottom) -->
+    <!-- Floating controls (bottom-right, shown on hover) -->
     <div class="floating-controls">
       <div class="font-controls">
         <button id="btn-font-down" class="float-btn" title="Decrease font size">A−</button>
@@ -161,16 +164,25 @@
         <button id="btn-font-up" class="float-btn" title="Increase font size">A+</button>
       </div>
       <div class="color-controls">
-        <button class="color-dot active" data-color="#ffffff" title="White" style="background:#ffffff;"></button>
-        <button class="color-dot" data-color="#ffd700" title="Yellow" style="background:#ffd700;"></button>
-        <button class="color-dot" data-color="#00e5ff" title="Cyan" style="background:#00e5ff;"></button>
+        <button class="color-dot active" data-color="#111827" title="Dark" style="background:#111827;"></button>
+        <button class="color-dot" data-color="#92400e" title="Yellow" style="background:#92400e;"></button>
+        <button class="color-dot" data-color="#164e63" title="Cyan" style="background:#164e63;"></button>
       </div>
-      <button id="btn-view-mode" class="float-btn" title="Toggle dual view">
+      <button id="btn-view-mode-float" class="float-btn" title="Toggle dual view">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <rect x="3" y="3" width="7" height="18" rx="1" />
           <rect x="14" y="3" width="7" height="18" rx="1" />
         </svg>
       </button>
+    </div>
+
+    <!-- Hidden buttons (keep IDs for app.js, but not visible in new design) -->
+    <div style="display:none">
+      <button id="btn-clear"></button>
+      <button id="btn-open-transcripts"></button>
+      <button id="btn-compact"></button>
+      <button id="btn-minimize"></button>
+      <button id="btn-close"></button>
     </div>
 
     <!-- Resize Handle -->

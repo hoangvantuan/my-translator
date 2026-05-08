@@ -202,7 +202,7 @@ export class TranscriptUI {
         if (!statusEl) {
             statusEl = document.createElement('div');
             statusEl.className = 'pipeline-status';
-            statusEl.style.cssText = 'text-align:center; padding:8px; color:rgba(255,255,255,0.5); font-size:13px;';
+            statusEl.style.cssText = 'text-align:center; padding:8px; color:var(--text-muted); font-size:13px;';
             this.contentEl.appendChild(statusEl);
         }
         statusEl.textContent = message;
