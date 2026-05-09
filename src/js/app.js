@@ -286,20 +286,24 @@ class App {
             }, 300);
         });
 
-        // Start/Stop button
+        // Start/Pause/Resume button
         document.getElementById('btn-start').addEventListener('click', async () => {
-            if (this.isStarting) return; // Prevent re-entry
+            if (this.isStarting) return;
             try {
                 if (this.isRunning) {
-                    await this.stop();
+                    await this.pause();
+                } else if (this.isPaused) {
+                    this.isStarting = true;
+                    await this.resume();
                 } else {
                     this.isStarting = true;
                     await this.start();
                 }
             } catch (err) {
-                console.error('[App] Start/Stop error:', err);
+                console.error('[App] Start/Pause/Resume error:', err);
                 this._showToast(`Error: ${err}`, 'error');
                 this.isRunning = false;
+                this.isPaused = false;
                 this._updateStartButton();
                 this._updateStatus('error');
                 this.transcriptUI.clear();
@@ -332,6 +336,28 @@ class App {
                 }
             });
         }
+
+        // Paused overlay buttons
+        document.getElementById('btn-paused-resume').addEventListener('click', async () => {
+            if (this.isStarting) return;
+            try {
+                this.isStarting = true;
+                await this.resume();
+            } catch (err) {
+                console.error('[App] Resume error:', err);
+                this._showToast(`Error: ${err}`, 'error');
+                this.isRunning = false;
+                this.isPaused = false;
+                this._updateStartButton();
+                this._updateStatus('error');
+            } finally {
+                this.isStarting = false;
+            }
+        });
+
+        document.getElementById('btn-paused-stop').addEventListener('click', async () => {
+            await this.stop();
+        });
 
         // Source buttons
         document.getElementById('btn-source-system').addEventListener('click', () => {
@@ -560,22 +586,26 @@ class App {
                 return;
             }
 
-            // Cmd/Ctrl + Enter: Start/Stop
+            // Cmd/Ctrl + Enter: Start/Pause/Resume (same as Space)
             if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
                 e.preventDefault();
                 if (this.isStarting) return;
                 (async () => {
                     try {
                         if (this.isRunning) {
-                            await this.stop();
+                            await this.pause();
+                        } else if (this.isPaused) {
+                            this.isStarting = true;
+                            await this.resume();
                         } else {
                             this.isStarting = true;
                             await this.start();
                         }
                     } catch (err) {
-                        console.error('[App] Keyboard start/stop error:', err);
+                        console.error('[App] Keyboard start/pause error:', err);
                         this._showToast(`Error: ${err}`, 'error');
                         this.isRunning = false;
+                        this.isPaused = false;
                         this._updateStartButton();
                         this._updateStatus('error');
                     } finally {
@@ -584,12 +614,44 @@ class App {
                 })();
             }
 
-            // Escape: Go back to overlay / close settings
+            // Space: Start/Pause/Resume
+            if (e.key === ' ' || e.code === 'Space') {
+                e.preventDefault();
+                if (this.isStarting) return;
+                (async () => {
+                    try {
+                        if (this.isRunning) {
+                            await this.pause();
+                        } else if (this.isPaused) {
+                            this.isStarting = true;
+                            await this.resume();
+                        } else {
+                            this.isStarting = true;
+                            await this.start();
+                        }
+                    } catch (err) {
+                        console.error('[App] Space shortcut error:', err);
+                        this._showToast(`Error: ${err}`, 'error');
+                        this.isRunning = false;
+                        this.isPaused = false;
+                        this._updateStartButton();
+                        this._updateStatus('error');
+                    } finally {
+                        this.isStarting = false;
+                    }
+                })();
+            }
+
+            // Escape: Stop session (when paused) or close settings
             if (e.key === 'Escape') {
                 e.preventDefault();
-                const settingsVisible = document.getElementById('settings-view').classList.contains('active');
-                if (settingsVisible) {
-                    this._showView('overlay');
+                if (this.isPaused) {
+                    (async () => await this.stop())();
+                } else {
+                    const settingsVisible = document.getElementById('settings-view').classList.contains('active');
+                    if (settingsVisible) {
+                        this._showView('overlay');
+                    }
                 }
             }
 
