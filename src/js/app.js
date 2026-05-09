@@ -33,7 +33,6 @@ class App {
         this.ttsEnabled = false;  // TTS runtime toggle
         this.isPinned = true;     // Always-on-top state
         this.isCompact = false;   // Compact mode (hide control bar)
-        this._toolbarHideTimer = null;
     }
 
     async init() {
@@ -218,6 +217,7 @@ class App {
         colorTrigger?.addEventListener('click', (e) => {
             e.stopPropagation();
             colorPalette.classList.toggle('hidden');
+            opacityPopover?.classList.add('hidden');
         });
 
         document.querySelectorAll('.color-palette .color-dot').forEach(dot => {
@@ -233,8 +233,56 @@ class App {
             });
         });
 
+        // Opacity trigger + popover
+        const opacityTrigger = document.querySelector('.opacity-trigger');
+        const opacityPopover = document.querySelector('.opacity-popover');
+        const opacitySlider = document.getElementById('range-opacity-live');
+        const opacityLabel = document.querySelector('.opacity-label');
+
+        opacityTrigger?.addEventListener('click', (e) => {
+            e.stopPropagation();
+            opacityPopover.classList.toggle('hidden');
+            colorPalette?.classList.add('hidden');
+        });
+
+        opacityPopover?.addEventListener('click', (e) => {
+            e.stopPropagation();
+        });
+
+        // Click-outside: close both popovers
         document.addEventListener('click', () => {
             colorPalette?.classList.add('hidden');
+            opacityPopover?.classList.add('hidden');
+        });
+
+        let opacitySaveTimeout = null;
+
+        opacitySlider?.addEventListener('input', (e) => {
+            const pct = parseInt(e.target.value);
+            const opacity = pct / 100;
+
+            // Real-time preview
+            document.getElementById('overlay-view').style.backgroundColor =
+                `rgba(255, 255, 255, ${opacity})`;
+            opacityLabel.textContent = `${pct}%`;
+
+            // Update trigger icon fill-opacity
+            const fillCircle = opacityTrigger.querySelector('circle[fill-opacity]');
+            if (fillCircle) fillCircle.setAttribute('fill-opacity', opacity);
+
+            // Debounced auto-save
+            clearTimeout(opacitySaveTimeout);
+            opacitySaveTimeout = setTimeout(async () => {
+                const settings = settingsManager.get();
+                settings.overlay_opacity = opacity;
+                await settingsManager.save(settings);
+
+                // Sync settings form slider
+                const settingsSlider = document.getElementById('range-opacity');
+                if (settingsSlider) settingsSlider.value = pct;
+                const settingsValue = document.getElementById('opacity-value');
+                if (settingsValue) settingsValue.textContent = `${pct}%`;
+            }, 300);
         });
 
         // Start/Stop button
@@ -799,6 +847,15 @@ class App {
         const overlayView = document.getElementById('overlay-view');
         const opacity = settings.overlay_opacity !== undefined ? settings.overlay_opacity : 0.85;
         overlayView.style.backgroundColor = `rgba(255, 255, 255, ${opacity})`;
+
+        // Sync opacity popover controls
+        const opacityPct = Math.round(opacity * 100);
+        const liveSlider = document.getElementById('range-opacity-live');
+        if (liveSlider) liveSlider.value = opacityPct;
+        const liveLabel = document.querySelector('.opacity-label');
+        if (liveLabel) liveLabel.textContent = `${opacityPct}%`;
+        const triggerFill = document.querySelector('.opacity-trigger circle[fill-opacity]');
+        if (triggerFill) triggerFill.setAttribute('fill-opacity', opacity);
 
         // Update transcript UI
         if (this.transcriptUI) {
