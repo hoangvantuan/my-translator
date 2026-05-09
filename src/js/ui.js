@@ -53,7 +53,15 @@ export class TranscriptUI {
         if (fontColor !== undefined) {
             this.fontColor = fontColor;
             this.container.style.setProperty('--transcript-font-color', fontColor);
+            this.container.style.setProperty('--transcript-font-color-muted', this._hexToRgba(fontColor, 0.75));
         }
+    }
+
+    _hexToRgba(hex, alpha) {
+        const r = parseInt(hex.slice(1, 3), 16);
+        const g = parseInt(hex.slice(3, 5), 16);
+        const b = parseInt(hex.slice(5, 7), 16);
+        return `rgba(${r}, ${g}, ${b}, ${alpha})`;
     }
 
     /**

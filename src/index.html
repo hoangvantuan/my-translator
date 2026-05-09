@@ -147,8 +147,8 @@
     </div>
 
     <!-- Transcript Area -->
-    <div id="transcript-container" data-tauri-drag-region>
-      <div id="transcript-content" data-tauri-drag-region>
+    <div id="transcript-container">
+      <div id="transcript-content">
       </div>
     </div>
 
@@ -160,9 +160,15 @@
         <button id="btn-font-up" class="float-btn" title="Increase font size">A+</button>
       </div>
       <div class="color-controls">
-        <button class="color-dot active" data-color="#111827" title="Dark" style="background:#111827;"></button>
-        <button class="color-dot" data-color="#92400e" title="Yellow" style="background:#92400e;"></button>
-        <button class="color-dot" data-color="#164e63" title="Cyan" style="background:#164e63;"></button>
+        <button class="color-trigger" title="Font color"></button>
+        <div class="color-palette hidden">
+          <button class="color-dot active" data-color="#111827" title="Dark" style="background:#111827;"></button>
+          <button class="color-dot" data-color="#92400e" title="Amber" style="background:#92400e;"></button>
+          <button class="color-dot" data-color="#164e63" title="Teal" style="background:#164e63;"></button>
+          <button class="color-dot" data-color="#14532d" title="Forest" style="background:#14532d;"></button>
+          <button class="color-dot" data-color="#7f1d1d" title="Wine" style="background:#7f1d1d;"></button>
+          <button class="color-dot" data-color="#e5e7eb" title="Light" style="background:#e5e7eb;"></button>
+        </div>
       </div>
       <button id="btn-view-mode-float" class="float-btn" title="Toggle dual view">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -241,6 +247,7 @@
           <div style="margin-bottom: 10px;">
             <span class="field-label">Translation Type</span>
             <select id="select-translation-type">
+              <option value="transcript_only">Transcript only — no translation</option>
               <option value="one_way">One-way → translate all to target</option>
               <option value="two_way">Two-way ↔ translate between two languages</option>
             </select>
