@@ -208,17 +208,33 @@ class App {
         });
 
         // Font size quick controls
-        document.getElementById('btn-font-up').addEventListener('click', () => this._adjustFontSize(4));
-        document.getElementById('btn-font-down').addEventListener('click', () => this._adjustFontSize(-4));
+        document.getElementById('btn-font-up').addEventListener('click', () => this._adjustFontSize(2));
+        document.getElementById('btn-font-down').addEventListener('click', () => this._adjustFontSize(-2));
 
-        // Color dot controls
-        document.querySelectorAll('.color-dot').forEach(dot => {
-            dot.addEventListener('click', () => {
-                document.querySelectorAll('.color-dot').forEach(d => d.classList.remove('active'));
+        // Color trigger + palette
+        const colorTrigger = document.querySelector('.color-trigger');
+        const colorPalette = document.querySelector('.color-palette');
+
+        colorTrigger?.addEventListener('click', (e) => {
+            e.stopPropagation();
+            colorPalette.classList.toggle('hidden');
+        });
+
+        document.querySelectorAll('.color-palette .color-dot').forEach(dot => {
+            dot.addEventListener('click', (e) => {
+                e.stopPropagation();
+                document.querySelectorAll('.color-palette .color-dot').forEach(d => d.classList.remove('active'));
                 dot.classList.add('active');
                 const color = dot.dataset.color;
                 this.transcriptUI.configure({ fontColor: color });
+                colorTrigger.style.background = color;
+                settingsManager.settings.font_color = color;
+                colorPalette.classList.add('hidden');
             });
+        });
+
+        document.addEventListener('click', () => {
+            colorPalette?.classList.add('hidden');
         });
 
         // Start/Stop button
@@ -315,6 +331,14 @@ class App {
         // Using Tauri's recommended appWindow.startDragging() approach instead
         document.getElementById('settings-view')?.addEventListener('mousedown', (e) => {
             const interactive = e.target.closest('button, input, select, label, a, textarea, .settings-section, .settings-actions');
+            if (!interactive && e.buttons === 1) {
+                e.preventDefault();
+                this.appWindow.startDragging();
+            }
+        });
+
+        document.getElementById('overlay-view')?.addEventListener('mousedown', (e) => {
+            const interactive = e.target.closest('button, input, select, label, a, textarea, .floating-controls, .floating-toolbar, .window-controls, #resize-handle');
             if (!interactive && e.buttons === 1) {
                 e.preventDefault();
                 this.appWindow.startDragging();
@@ -442,6 +466,10 @@ class App {
         // Wire Soniox callbacks
         sonioxClient.onOriginal = (text, speaker, language) => {
             this.transcriptUI.addOriginal(text, speaker, language);
+            const translationType = settingsManager.get().translation_type || 'one_way';
+            if (translationType === 'transcript_only') {
+                this._speakIfEnabled(text);
+            }
         };
 
         sonioxClient.onTranslation = (text) => {
@@ -706,6 +734,7 @@ class App {
             font_size: parseInt(document.getElementById('range-font-size').value),
             max_lines: parseInt(document.getElementById('range-max-lines').value),
             show_original: document.querySelector('input[name="show-original"]:checked')?.value || 'below',
+            font_color: settingsManager.settings.font_color || '#111827',
             custom_context: null,
         };
 
@@ -774,10 +803,19 @@ class App {
         // Update transcript UI
         if (this.transcriptUI) {
             const showOriginal = settings.show_original || 'below';
+            const fontColor = settings.font_color || '#111827';
             this.transcriptUI.configure({
                 maxLines: settings.max_lines || 5,
                 showOriginal: showOriginal,
                 fontSize: settings.font_size || 16,
+                fontColor: fontColor,
+            });
+
+            // Sync color trigger dot and palette active state
+            const trigger = document.querySelector('.color-trigger');
+            if (trigger) trigger.style.background = fontColor;
+            document.querySelectorAll('.color-palette .color-dot').forEach(d => {
+                d.classList.toggle('active', d.dataset.color === fontColor);
             });
             this._updateViewModeButton(showOriginal);
         }
@@ -921,13 +959,17 @@ class App {
         const hintTwoway = document.getElementById('hint-twoway');
         const strictLang = document.getElementById('section-strict-lang');
 
-        if (type === 'two_way') {
+        if (type === 'transcript_only') {
+            if (oneway) oneway.style.display = 'none';
+            if (twoway) twoway.style.display = 'none';
+            if (hintTwoway) hintTwoway.style.display = 'none';
+            if (strictLang) strictLang.style.display = 'none';
+            this._updateTTSButton();
+        } else if (type === 'two_way') {
             if (oneway) oneway.style.display = 'none';
             if (twoway) twoway.style.display = 'flex';
             if (hintTwoway) hintTwoway.style.display = 'block';
-            // Hide strict lang in two-way mode (both languages are specified)
             if (strictLang) strictLang.style.display = 'none';
-            // Force-disable TTS in two-way mode to prevent audio feedback loop
             if (this.ttsEnabled) {
                 this.ttsEnabled = false;
                 this._getActiveTTS().disconnect();
@@ -1181,9 +1223,11 @@ class App {
             };
             const sourceLang = sourceLangMap[settings.source_language] || 'Japanese';
 
+            const translationType = settings.translation_type || 'one_way';
             await invoke('start_local_pipeline', {
                 sourceLang: sourceLang,
                 targetLang: settings.target_language || 'vi',
+                transcriptOnly: translationType === 'transcript_only',
                 channel: this.localPipelineChannel,
             });
             console.log('[App] Local pipeline spawned');
@@ -1232,15 +1276,15 @@ class App {
                 this._showToast('Local models ready!', 'success');
                 break;
             case 'result':
-                // Chase effect: show original first (gray), then translation (white)
                 if (data.original) {
                     this.transcriptUI.addOriginal(data.original);
                 }
-                // Small delay for visual "chase" effect
                 setTimeout(() => {
                 if (data.translated) {
                     this.transcriptUI.addTranslation(data.translated);
                     this._speakIfEnabled(data.translated);
+                } else if (data.original) {
+                    this._speakIfEnabled(data.original);
                 }
                 }, 80);
                 break;
@@ -1582,26 +1626,6 @@ class App {
     }
 
     _bindToolbarHover() {
-        const overlay = document.getElementById('overlay-view');
-        const toolbar = document.querySelector('.floating-toolbar');
-        if (!overlay || !toolbar) return;
-
-        const show = () => {
-            clearTimeout(this._toolbarHideTimer);
-            overlay.classList.add('toolbar-visible');
-        };
-
-        const scheduleHide = () => {
-            clearTimeout(this._toolbarHideTimer);
-            this._toolbarHideTimer = setTimeout(() => {
-                overlay.classList.remove('toolbar-visible');
-            }, 5000);
-        };
-
-        overlay.addEventListener('mouseenter', show);
-        toolbar.addEventListener('mouseenter', show);
-        overlay.addEventListener('mouseleave', scheduleHide);
-        toolbar.addEventListener('mouseleave', scheduleHide);
     }
 
     _toggleViewMode() {
