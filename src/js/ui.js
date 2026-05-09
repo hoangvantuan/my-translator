@@ -54,6 +54,10 @@ export class TranscriptUI {
             this.fontColor = fontColor;
             this.container.style.setProperty('--transcript-font-color', fontColor);
             this.container.style.setProperty('--transcript-font-color-muted', this._hexToRgba(fontColor, 0.75));
+            const shadowColor = this._luminance(fontColor) < 0.5
+                ? 'rgba(255, 255, 255, 0.6)'
+                : 'rgba(0, 0, 0, 0.4)';
+            this.container.style.setProperty('--transcript-text-shadow', `0 0 8px ${shadowColor}`);
         }
     }
 
@@ -62,6 +66,13 @@ export class TranscriptUI {
         const g = parseInt(hex.slice(3, 5), 16);
         const b = parseInt(hex.slice(5, 7), 16);
         return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+    }
+
+    _luminance(hex) {
+        const r = parseInt(hex.slice(1, 3), 16) / 255;
+        const g = parseInt(hex.slice(3, 5), 16) / 255;
+        const b = parseInt(hex.slice(5, 7), 16) / 255;
+        return 0.299 * r + 0.587 * g + 0.114 * b;
     }
 
     /**
