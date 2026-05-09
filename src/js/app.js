@@ -1187,6 +1187,7 @@ class App {
             this.sessionStartTime = new Date();
             const translationType = settings.translation_type || 'one_way';
             this.sessionMode = translationType;
+            this.transcriptUI.configure({ transcriptOnly: translationType === 'transcript_only' });
             if (translationType === 'two_way') {
                 this.sessionSourceLang = settings.language_a || 'ja';
                 this.sessionTargetLang = settings.language_b || 'vi';

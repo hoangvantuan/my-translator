@@ -1,7 +1,7 @@
 <!-- gitnexus:start -->
 # GitNexus — Code Intelligence
 
-This project is indexed by GitNexus as **ui-redesign-light** (594 symbols, 1430 relationships, 50 execution flows). Use the GitNexus MCP tools to understand code, assess impact, and navigate safely.
+This project is indexed by GitNexus as **my-translator** (893 symbols, 1880 relationships, 75 execution flows). Use the GitNexus MCP tools to understand code, assess impact, and navigate safely.
 
 > If any GitNexus tool warns the index is stale, run `npx gitnexus analyze` in terminal first.
 
@@ -17,7 +17,7 @@ This project is indexed by GitNexus as **ui-redesign-light** (594 symbols, 1430 
 
 1. `gitnexus_query({query: "<error or symptom>"})` — find execution flows related to the issue
 2. `gitnexus_context({name: "<suspect function>"})` — see all callers, callees, and process participation
-3. `READ gitnexus://repo/ui-redesign-light/process/{processName}` — trace the full execution flow step by step
+3. `READ gitnexus://repo/my-translator/process/{processName}` — trace the full execution flow step by step
 4. For regressions: `gitnexus_detect_changes({scope: "compare", base_ref: "main"})` — see what your branch changed
 
 ## When Refactoring
@@ -56,10 +56,10 @@ This project is indexed by GitNexus as **ui-redesign-light** (594 symbols, 1430 
 
 | Resource | Use for |
 |----------|---------|
-| `gitnexus://repo/ui-redesign-light/context` | Codebase overview, check index freshness |
-| `gitnexus://repo/ui-redesign-light/clusters` | All functional areas |
-| `gitnexus://repo/ui-redesign-light/processes` | All execution flows |
-| `gitnexus://repo/ui-redesign-light/process/{name}` | Step-by-step execution trace |
+| `gitnexus://repo/my-translator/context` | Codebase overview, check index freshness |
+| `gitnexus://repo/my-translator/clusters` | All functional areas |
+| `gitnexus://repo/my-translator/processes` | All execution flows |
+| `gitnexus://repo/my-translator/process/{name}` | Step-by-step execution trace |
 
 ## Self-Check Before Finishing
 

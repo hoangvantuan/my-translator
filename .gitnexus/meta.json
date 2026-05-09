@@ -1,13 +1,13 @@
 {
-  "repoPath": "/Users/tuanhv/Desktop/git_projects/my-translator/.claude/worktrees/ui-redesign-light",
-  "lastCommit": "f90ddffd864eeb0097ab86b56ed8ab9a1eef5b0f",
-  "indexedAt": "2026-05-08T16:48:09.595Z",
+  "repoPath": "/Users/tuanhv/Desktop/git_projects/my-translator",
+  "lastCommit": "c369d64aa915fa66b9e1c0df5bc21dcd6656b72b",
+  "indexedAt": "2026-05-09T11:56:46.255Z",
   "stats": {
-    "files": 43,
-    "nodes": 594,
-    "edges": 1430,
-    "communities": 40,
-    "processes": 50,
+    "files": 64,
+    "nodes": 893,
+    "edges": 1880,
+    "communities": 43,
+    "processes": 75,
     "embeddings": 0
   }
 }

@@ -62,3 +62,4 @@ scripts/test_*.py
 GEMINI.md
 CLAUDE.md
 .superpowers/
+.gitnexus

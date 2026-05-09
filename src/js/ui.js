@@ -17,6 +17,7 @@ export class TranscriptUI {
         this.maxChars = 1200;
         this.fontSize = 16;
         this.showOriginal = 'below'; // 'off' | 'below' | 'dual'
+        this.transcriptOnly = false;
 
         // Segments: each has { original, translation, status, speaker, language, confidence }
         this.segments = [];
@@ -36,8 +37,12 @@ export class TranscriptUI {
     /**
      * Update display settings
      */
-    configure({ maxLines, showOriginal, fontSize, fontColor }) {
+    configure({ maxLines, showOriginal, fontSize, fontColor, transcriptOnly }) {
         if (maxLines !== undefined) this.maxChars = maxLines * 160;
+        if (transcriptOnly !== undefined) {
+            this.transcriptOnly = transcriptOnly;
+            this._render();
+        }
         if (showOriginal !== undefined) {
             this.showOriginal = showOriginal;
             const overlay = document.getElementById('overlay-view');
@@ -414,6 +419,11 @@ export class TranscriptUI {
                     html += `<div class="seg-original">${this._esc(seg.original)}</div>`;
                 }
                 html += `</div>`;
+            } else if (this.transcriptOnly && seg.status === 'original' && seg.original) {
+                const confidenceClass = (seg.confidence !== null && seg.confidence < 0.7) ? ' low-confidence' : '';
+                html += `<div class="seg-block">`;
+                html += `<div class="seg-translated${confidenceClass}">${this._esc(seg.original)}</div>`;
+                html += `</div>`;
             }
         }
 
@@ -566,6 +576,9 @@ export class TranscriptUI {
      * - Max 3 pending originals allowed (oldest dropped)
      */
     _cleanupStaleOriginals() {
+        // In transcript_only mode, originals ARE the final output — never stale.
+        if (this.transcriptOnly) return;
+
         const now = Date.now();
         const STALE_MS = 10000; // 10 seconds
         const MAX_PENDING = 3;
