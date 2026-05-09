@@ -1,13 +1,13 @@
 {
   "repoPath": "/Users/tuanhv/Desktop/git_projects/my-translator",
-  "lastCommit": "c369d64aa915fa66b9e1c0df5bc21dcd6656b72b",
-  "indexedAt": "2026-05-09T11:56:46.255Z",
+  "lastCommit": "676055a61ee2c2330fbb81c07ef0263db409c668",
+  "indexedAt": "2026-05-09T12:16:40.910Z",
   "stats": {
-    "files": 64,
-    "nodes": 893,
-    "edges": 1880,
+    "files": 65,
+    "nodes": 907,
+    "edges": 1907,
     "communities": 43,
-    "processes": 75,
+    "processes": 77,
     "embeddings": 0
   }
 }
