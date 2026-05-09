@@ -12,6 +12,7 @@ const DEFAULT_SETTINGS = {
   audio_source: 'system',
   overlay_opacity: 0.85,
   font_size: 16,
+  font_color: '#111827',
   max_lines: 5,
   show_original: 'below',
   translation_mode: 'soniox',

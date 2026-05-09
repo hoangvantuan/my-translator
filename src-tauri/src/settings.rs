@@ -64,6 +64,8 @@ pub struct Settings {
     pub overlay_opacity: f64,
     /// Font size in px
     pub font_size: u32,
+    /// Font color hex string
+    pub font_color: String,
     /// Max transcript lines to display
     pub max_lines: u32,
     /// How to show original text: "off" | "below" | "dual"
@@ -106,6 +108,7 @@ impl Default for Settings {
             audio_source: "system".to_string(),
             overlay_opacity: 0.85,
             font_size: 16,
+            font_color: "#111827".to_string(),
             max_lines: 5,
             show_original: "below".to_string(),
             translation_mode: "soniox".to_string(),
