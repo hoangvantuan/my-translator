@@ -208,10 +208,6 @@ class App {
             this._toggleViewMode();
         });
 
-        // View mode toggle (floating controls duplicate)
-        document.getElementById('btn-view-mode-float')?.addEventListener('click', () => {
-            this._toggleViewMode();
-        });
 
         // Font size quick controls
         document.getElementById('btn-font-up').addEventListener('click', () => this._adjustFontSize(2));
@@ -1805,16 +1801,11 @@ class App {
 
     _updateViewModeButton(mode) {
         const btn = document.getElementById('btn-view-mode');
-        const btnFloat = document.getElementById('btn-view-mode-float');
         const titles = { off: 'Original: off', below: 'Original: below translation', dual: 'Original: dual panel' };
         const title = titles[mode] || titles.below;
         if (btn) {
             btn.classList.toggle('active', mode !== 'off');
             btn.title = title;
-        }
-        if (btnFloat) {
-            btnFloat.classList.toggle('active', mode !== 'off');
-            btnFloat.title = title;
         }
     }
 
