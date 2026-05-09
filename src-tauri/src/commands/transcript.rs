@@ -1,8 +1,11 @@
-use std::fs;
-use std::path::PathBuf;
+use std::fs::{self, File};
+use std::io::Read;
+use std::path::{Path, PathBuf};
 use tauri::{AppHandle, Manager};
 use chrono::Local;
 use serde::Serialize;
+
+const FRONTMATTER_PREFIX_LIMIT: usize = 16 * 1024;
 
 /// Get the transcript directory path
 fn transcript_dir(app: &AppHandle) -> Result<PathBuf, String> {
@@ -62,6 +65,49 @@ pub struct TranscriptEntry {
     target_lang: Option<String>,
 }
 
+#[derive(Default)]
+struct TranscriptMetadata {
+    duration: Option<String>,
+    source_lang: Option<String>,
+    target_lang: Option<String>,
+}
+
+fn read_frontmatter_prefix(path: &Path) -> String {
+    let mut file = match File::open(path) {
+        Ok(file) => file,
+        Err(_) => return String::new(),
+    };
+    let mut buffer = vec![0; FRONTMATTER_PREFIX_LIMIT];
+    match file.read(&mut buffer) {
+        Ok(bytes_read) => {
+            buffer.truncate(bytes_read);
+            String::from_utf8_lossy(&buffer).into_owned()
+        }
+        Err(_) => String::new(),
+    }
+}
+
+fn parse_transcript_metadata(content: &str) -> TranscriptMetadata {
+    let Some(after_open) = content.strip_prefix("---") else {
+        return TranscriptMetadata::default();
+    };
+    let Some(end) = after_open.find("---") else {
+        return TranscriptMetadata::default();
+    };
+
+    let mut metadata = TranscriptMetadata::default();
+    for line in after_open[..end].lines() {
+        if let Some(val) = line.strip_prefix("duration:") {
+            metadata.duration = Some(val.trim().to_string());
+        } else if let Some(val) = line.strip_prefix("source_lang:") {
+            metadata.source_lang = Some(val.trim().to_string());
+        } else if let Some(val) = line.strip_prefix("target_lang:") {
+            metadata.target_lang = Some(val.trim().to_string());
+        }
+    }
+    metadata
+}
+
 /// List all saved transcript sessions, newest first
 #[tauri::command]
 pub fn list_transcripts(app: AppHandle) -> Result<Vec<TranscriptEntry>, String> {
@@ -75,7 +121,8 @@ pub fn list_transcripts(app: AppHandle) -> Result<Vec<TranscriptEntry>, String> 
             if !filename.ends_with(".md") {
                 return None;
             }
-            let path = entry.path().to_string_lossy().to_string();
+            let entry_path = entry.path();
+            let path = entry_path.to_string_lossy().to_string();
             let size_bytes = entry.metadata().ok()?.len();
             let created_at = {
                 let base = filename.strip_suffix(".md").unwrap_or(&filename);
@@ -88,36 +135,16 @@ pub fn list_transcripts(app: AppHandle) -> Result<Vec<TranscriptEntry>, String> 
                     base.to_string()
                 }
             };
-            let (duration, source_lang, target_lang) = {
-                let content = fs::read_to_string(entry.path()).unwrap_or_default();
-                let mut dur = None;
-                let mut src = None;
-                let mut tgt = None;
-                if content.starts_with("---") {
-                    if let Some(end) = content[3..].find("---") {
-                        let yaml = &content[3..3 + end];
-                        for line in yaml.lines() {
-                            if let Some(val) = line.strip_prefix("duration:") {
-                                dur = Some(val.trim().to_string());
-                            } else if let Some(val) = line.strip_prefix("source_lang:") {
-                                src = Some(val.trim().to_string());
-                            } else if let Some(val) = line.strip_prefix("target_lang:") {
-                                tgt = Some(val.trim().to_string());
-                            }
-                        }
-                    }
-                }
-                (dur, src, tgt)
-            };
+            let metadata = parse_transcript_metadata(&read_frontmatter_prefix(&entry_path));
 
             Some(TranscriptEntry {
                 filename,
                 path,
                 created_at,
                 size_bytes,
-                duration,
-                source_lang,
-                target_lang,
+                duration: metadata.duration,
+                source_lang: metadata.source_lang,
+                target_lang: metadata.target_lang,
             })
         })
         .collect();
@@ -139,4 +166,36 @@ pub fn read_transcript(app: AppHandle, filename: String) -> Result<String, Strin
     let filepath = dir.join(&filename);
     fs::read_to_string(&filepath)
         .map_err(|e| format!("Failed to read transcript: {}", e))
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn parse_transcript_metadata_reads_frontmatter_fields() {
+        let content = r#"---
+duration: 00:02:34
+source_lang: en
+target_lang: vi
+---
+
+Transcript body.
+"#;
+
+        let metadata = parse_transcript_metadata(content);
+
+        assert_eq!(metadata.duration.as_deref(), Some("00:02:34"));
+        assert_eq!(metadata.source_lang.as_deref(), Some("en"));
+        assert_eq!(metadata.target_lang.as_deref(), Some("vi"));
+    }
+
+    #[test]
+    fn parse_transcript_metadata_returns_empty_when_frontmatter_missing() {
+        let metadata = parse_transcript_metadata("Transcript body without metadata.");
+
+        assert!(metadata.duration.is_none());
+        assert!(metadata.source_lang.is_none());
+        assert!(metadata.target_lang.is_none());
+    }
 }
