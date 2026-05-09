@@ -33,6 +33,7 @@ class App {
         this.ttsEnabled = false;  // TTS runtime toggle
         this.isPinned = true;     // Always-on-top state
         this.isCompact = false;   // Compact mode (hide control bar)
+        this.isPaused = false;    // Paused state (session alive, connections closed)
     }
 
     async init() {
@@ -1479,6 +1480,7 @@ class App {
 
     async stop() {
         this.isRunning = false;
+        this.isPaused = false;
         this._updateStartButton();
 
         // Stop audio capture
@@ -1521,6 +1523,48 @@ class App {
 
         // Reset session tracking
         this.sessionStartTime = null;
+    }
+
+    async pause() {
+        this.isRunning = false;
+        this.isPaused = true;
+        this._updateStartButton();
+
+        // Stop audio capture
+        try {
+            await invoke('stop_capture');
+        } catch (err) {
+            console.error('Failed to stop audio capture:', err);
+        }
+
+        if (this.translationMode === 'local') {
+            try {
+                await invoke('stop_local_pipeline');
+            } catch (err) {
+                console.error('Failed to stop local pipeline:', err);
+            }
+            this.localPipelineReady = false;
+            this.transcriptUI.removeStatusMessage();
+        } else {
+            sonioxClient.disconnect();
+        }
+
+        // Keep transcript visible — don't clear, don't save
+        this.transcriptUI.clearProvisional();
+
+        // Stop TTS
+        elevenLabsTTS.disconnect();
+        edgeTTSRust.disconnect();
+        googleTTS.disconnect();
+        audioPlayer.stop();
+
+        this._updateStatus('paused');
+    }
+
+    async resume() {
+        this.isPaused = false;
+        this._updateStartButton();
+        await this.start();
     }
 
     _updateStartButton() {
