@@ -133,13 +133,15 @@ body {
   align-items: center;
   gap: 6px;
   opacity: 0;
-  transition: opacity 0.3s ease 1.5s;
+  visibility: hidden;
+  transition: opacity 0.3s ease 1.5s, visibility 0s 1.8s;
   z-index: 10;
 }
 
 #overlay-view:hover .window-controls {
   opacity: 1;
-  transition: opacity 0.15s ease;
+  visibility: visible;
+  transition: opacity 0.15s ease, visibility 0s;
 }
 
 .wc-btn {
@@ -233,13 +235,16 @@ body {
   align-items: center;
   gap: 4px;
   opacity: 0;
-  transition: opacity var(--transition-fast);
+  visibility: hidden;
+  transition: opacity var(--transition-fast), visibility 0s 0.15s;
   z-index: 5;
   pointer-events: none;
 }
 
 #overlay-view.is-recording:hover .status-label {
   opacity: 1;
+  visibility: visible;
+  transition: opacity var(--transition-fast), visibility 0s;
 }
 
 .status-label-dot {
@@ -736,12 +741,14 @@ body {
   gap: 6px;
   z-index: 10;
   opacity: 0;
-  transition: opacity 0.3s ease 1.5s;
+  visibility: hidden;
+  transition: opacity 0.3s ease 1.5s, visibility 0s 1.8s;
 }
 
 #overlay-view:hover .floating-controls {
   opacity: 1;
-  transition: opacity 0.15s ease;
+  visibility: visible;
+  transition: opacity 0.15s ease, visibility 0s;
 }
 
 .font-controls {
