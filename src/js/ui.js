@@ -332,9 +332,10 @@ export class TranscriptUI {
 
         // Transcript entries
         for (const seg of this.sessionLog) {
+            const ts = this._formatTimestamp(seg.createdAt);
             if (seg.speaker) lines.push(`**Speaker ${seg.speaker}:**`);
-            if (seg.original) lines.push(`> ${seg.original}`);
-            if (seg.translation) lines.push(seg.translation);
+            if (seg.original) lines.push(`[${ts}] > ${seg.original}`);
+            if (seg.translation) lines.push(`[${ts}] ${seg.translation}`);
             lines.push('');
         }
 
@@ -631,6 +632,17 @@ export class TranscriptUI {
         const div = document.createElement('div');
         div.textContent = text;
         return div.innerHTML;
+    }
+
+    /**
+     * Format timestamp from Date.now() millis to HH:MM:SS
+     */
+    _formatTimestamp(ms) {
+        const d = new Date(ms);
+        const h = String(d.getHours()).padStart(2, '0');
+        const m = String(d.getMinutes()).padStart(2, '0');
+        const s = String(d.getSeconds()).padStart(2, '0');
+        return `${h}:${m}:${s}`;
     }
 
     /**

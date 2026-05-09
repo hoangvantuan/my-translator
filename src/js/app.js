@@ -150,13 +150,42 @@ class App {
             document.getElementById('session-viewer').style.display = 'none';
         });
 
-        // Copy session content
+        // Copy session content — split-button with dropdown
+        this._copyMode = 'bilingual';  // default content mode
+        this._copyTimestamp = false;    // default: no timestamp
+
         document.getElementById('btn-session-copy').addEventListener('click', async () => {
-            const el = document.getElementById('session-viewer-content');
-            const content = el?.dataset.rawText || el?.textContent || '';
-            if (content) {
-                await navigator.clipboard.writeText(content);
-                this._showToast('Copied to clipboard', 'success');
+            await this._copySessionContent(this._copyMode, this._copyTimestamp);
+        });
+
+        document.getElementById('btn-session-copy-toggle')?.addEventListener('click', (e) => {
+            e.stopPropagation();
+            document.getElementById('session-copy-menu')?.classList.toggle('open');
+        });
+
+        document.querySelectorAll('.copy-menu-item').forEach(item => {
+            item.addEventListener('click', async (e) => {
+                e.stopPropagation();
+                const mode = item.dataset.mode;
+                this._copyMode = mode;
+                // Update active state
+                document.querySelectorAll('.copy-menu-item').forEach(i => i.classList.remove('active'));
+                item.classList.add('active');
+                // Close menu and copy
+                document.getElementById('session-copy-menu')?.classList.remove('open');
+                await this._copySessionContent(mode, this._copyTimestamp);
+            });
+        });
+
+        document.getElementById('check-copy-timestamp')?.addEventListener('change', (e) => {
+            this._copyTimestamp = e.target.checked;
+        });
+
+        // Close copy menu on outside click
+        document.addEventListener('click', (e) => {
+            const wrapper = document.querySelector('.session-copy-wrapper');
+            if (wrapper && !wrapper.contains(e.target)) {
+                document.getElementById('session-copy-menu')?.classList.remove('open');
             }
         });
 
@@ -1970,6 +1999,7 @@ class App {
             }
         }
 
+        const tsRegex = /^\[(\d{2}:\d{2}:\d{2})\]\s*/;
         const lines = body.split('\n');
         const parts = [];
         let i = 0;
@@ -1984,22 +2014,123 @@ class App {
                 continue;
             }
 
-            if (line.startsWith('> ')) {
-                parts.push(`<div class="session-original">${this._esc(line.slice(2))}</div>`);
+            // Parse optional timestamp prefix
+            let timestamp = null;
+            let content = line;
+            const tsMatch = line.match(tsRegex);
+            if (tsMatch) {
+                timestamp = tsMatch[1];
+                content = line.slice(tsMatch[0].length);
+            }
+
+            const tsHtml = timestamp
+                ? `<span class="session-timestamp">${timestamp}</span>`
+                : '';
+
+            if (content.startsWith('> ')) {
+                parts.push(`<div class="session-original">${tsHtml}${this._esc(content.slice(2))}</div>`);
                 i++;
                 continue;
             }
 
-            if (line.trim() === '') {
+            if (content.trim() === '') {
                 i++;
                 continue;
             }
 
-            parts.push(`<div class="session-translation">${this._esc(line)}</div>`);
+            parts.push(`<div class="session-translation">${tsHtml}${this._esc(content)}</div>`);
             i++;
         }
 
         return metaHtml + '<div class="session-segments">' + parts.join('') + '</div>';
+    }
+
+    /**
+     * Build copy text from raw session file based on mode + timestamp flag.
+     * Parses the markdown format into segments, then formats output.
+     */
+    _buildCopyText(rawText, mode, withTimestamp) {
+        let body = rawText;
+        if (rawText.startsWith('---')) {
+            const endIdx = rawText.indexOf('---', 3);
+            if (endIdx !== -1) body = rawText.slice(endIdx + 3).trim();
+        }
+
+        const tsRegex = /^\[(\d{2}:\d{2}:\d{2})\]\s*/;
+        const lines = body.split('\n');
+        const segments = [];
+        let cur = null;
+
+        for (const line of lines) {
+            const speakerMatch = line.match(/^\*\*(.+?):\*\*$/);
+            if (speakerMatch) {
+                if (cur) segments.push(cur);
+                cur = { speaker: speakerMatch[1], original: '', translation: '', ts: '' };
+                continue;
+            }
+            if (line.trim() === '') {
+                if (cur) { segments.push(cur); cur = null; }
+                continue;
+            }
+
+            let ts = '';
+            let content = line;
+            const tsMatch = line.match(tsRegex);
+            if (tsMatch) { ts = tsMatch[1]; content = line.slice(tsMatch[0].length); }
+
+            if (!cur) cur = { speaker: '', original: '', translation: '', ts: '' };
+
+            if (content.startsWith('> ')) {
+                cur.original = content.slice(2);
+                if (ts) cur.ts = ts;
+            } else {
+                cur.translation = content;
+                if (ts && !cur.ts) cur.ts = ts;
+            }
+        }
+        if (cur) segments.push(cur);
+
+        const result = [];
+        for (const seg of segments) {
+            const prefix = (withTimestamp && seg.ts) ? `[${seg.ts}] ` : '';
+
+            if (mode === 'original') {
+                if (seg.original) result.push(`${prefix}${seg.original}`);
+            } else if (mode === 'translation') {
+                if (seg.translation) result.push(`${prefix}${seg.translation}`);
+            } else {
+                // bilingual: pair original → translation
+                if (seg.original && seg.translation) {
+                    result.push(`${prefix}${seg.original}`);
+                    result.push(`${prefix}${seg.translation}`);
+                    result.push('');
+                } else if (seg.original) {
+                    result.push(`${prefix}${seg.original}`);
+                } else if (seg.translation) {
+                    result.push(`${prefix}${seg.translation}`);
+                }
+            }
+        }
+        return result.join('\n').trim();
+    }
+
+    async _copySessionContent(mode, withTimestamp) {
+        const el = document.getElementById('session-viewer-content');
+        const rawText = el?.dataset.rawText || '';
+        if (!rawText) {
+            this._showToast('Nothing to copy', 'info');
+            return;
+        }
+        const text = this._buildCopyText(rawText, mode, withTimestamp);
+        if (text) {
+            await navigator.clipboard.writeText(text);
+            const labels = {
+                original: 'Copied original',
+                translation: 'Copied translation',
+                bilingual: 'Copied bilingual',
+            };
+            this._showToast(labels[mode] || 'Copied', 'success');
+        }
     }
 
     _parseSessionMeta(session) {

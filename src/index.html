@@ -732,13 +732,30 @@
           </svg>
         </button>
         <span id="session-viewer-title" class="session-viewer-title-text"></span>
-        <button id="btn-session-copy" class="session-copy-btn" title="Copy content">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
-            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
-          </svg>
-          Copy
-        </button>
+        <div class="session-copy-wrapper">
+          <button id="btn-session-copy" class="session-copy-btn" title="Copy content">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+              <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+            </svg>
+            <span id="session-copy-label">Copy</span>
+          </button>
+          <button id="btn-session-copy-toggle" class="session-copy-toggle" title="Copy options">
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <polyline points="6 9 12 15 18 9" />
+            </svg>
+          </button>
+          <div id="session-copy-menu" class="session-copy-menu">
+            <label class="copy-menu-toggle">
+              <input type="checkbox" id="check-copy-timestamp" />
+              <span>With timestamp</span>
+            </label>
+            <div class="copy-menu-separator"></div>
+            <button class="copy-menu-item" data-mode="original">Copy original</button>
+            <button class="copy-menu-item" data-mode="translation">Copy translation</button>
+            <button class="copy-menu-item active" data-mode="bilingual">Copy bilingual</button>
+          </div>
+        </div>
       </div>
       <div id="session-viewer-content" class="session-content-scroll"></div>
     </div>
