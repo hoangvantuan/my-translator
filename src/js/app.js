@@ -1570,19 +1570,38 @@ class App {
     _updateStartButton() {
         const btn = document.getElementById('btn-start');
         const iconPlay = document.getElementById('icon-play');
+        const iconPause = document.getElementById('icon-pause');
         const iconStop = document.getElementById('icon-stop');
-
-        if (btn) btn.classList.toggle('recording', this.isRunning);
-        if (iconPlay) iconPlay.style.display = this.isRunning ? 'none' : 'block';
-        if (iconStop) iconStop.style.display = this.isRunning ? 'block' : 'none';
-
         const idleOverlay = document.getElementById('idle-overlay');
+        const pausedOverlay = document.getElementById('paused-overlay');
         const overlayView = document.getElementById('overlay-view');
-        if (idleOverlay) {
-            idleOverlay.classList.toggle('hidden', this.isRunning);
-        }
-        if (overlayView) {
-            overlayView.classList.toggle('is-recording', this.isRunning);
+
+        // Hide all icons first
+        if (iconPlay) iconPlay.style.display = 'none';
+        if (iconPause) iconPause.style.display = 'none';
+        if (iconStop) iconStop.style.display = 'none';
+
+        if (this.isRunning) {
+            // Running: show pause icon, hide both overlays
+            if (iconPause) iconPause.style.display = 'block';
+            if (btn) btn.classList.add('recording');
+            if (idleOverlay) idleOverlay.classList.add('hidden');
+            if (pausedOverlay) pausedOverlay.classList.add('hidden');
+            if (overlayView) overlayView.classList.add('is-recording');
+        } else if (this.isPaused) {
+            // Paused: show play icon (ready to resume), show paused-overlay
+            if (iconPlay) iconPlay.style.display = 'block';
+            if (btn) btn.classList.remove('recording');
+            if (idleOverlay) idleOverlay.classList.add('hidden');
+            if (pausedOverlay) pausedOverlay.classList.remove('hidden');
+            if (overlayView) overlayView.classList.remove('is-recording');
+        } else {
+            // Idle: show play icon, show idle-overlay
+            if (iconPlay) iconPlay.style.display = 'block';
+            if (btn) btn.classList.remove('recording');
+            if (idleOverlay) idleOverlay.classList.remove('hidden');
+            if (pausedOverlay) pausedOverlay.classList.add('hidden');
+            if (overlayView) overlayView.classList.remove('is-recording');
         }
     }
 
@@ -1646,6 +1665,10 @@ class App {
             case 'disconnected':
                 dot.classList.add('disconnected');
                 text.textContent = 'Ready';
+                break;
+            case 'paused':
+                dot.classList.add('connecting');  // reuse yellow/amber dot
+                text.textContent = 'Paused';
                 break;
             case 'error':
                 dot.classList.add('error');
