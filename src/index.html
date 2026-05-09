@@ -170,6 +170,18 @@
           <button class="color-dot" data-color="#e5e7eb" title="Light" style="background:#e5e7eb;"></button>
         </div>
       </div>
+      <div class="opacity-control">
+        <button class="opacity-trigger" title="Background opacity">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+            <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.5" fill="currentColor" fill-opacity="0.85"/>
+            <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.5" fill="none"/>
+          </svg>
+        </button>
+        <div class="opacity-popover hidden">
+          <input type="range" id="range-opacity-live" min="20" max="100" value="85" />
+          <span class="opacity-label">85%</span>
+        </div>
+      </div>
       <button id="btn-view-mode-float" class="float-btn" title="Toggle dual view">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <rect x="3" y="3" width="7" height="18" rx="1" />
