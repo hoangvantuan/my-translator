@@ -451,6 +451,8 @@ class App {
 
         document.getElementById('range-font-size').addEventListener('input', (e) => {
             document.getElementById('font-size-value').textContent = `${e.target.value}px`;
+            const display = document.getElementById('font-size-display');
+            if (display) display.textContent = e.target.value;
         });
 
         document.getElementById('range-max-lines').addEventListener('input', (e) => {
@@ -724,6 +726,8 @@ class App {
 
         document.getElementById('range-font-size').value = s.font_size || 16;
         document.getElementById('font-size-value').textContent = `${s.font_size || 16}px`;
+        const fontDisplay = document.getElementById('font-size-display');
+        if (fontDisplay) fontDisplay.textContent = s.font_size || 16;
 
         document.getElementById('range-max-lines').value = s.max_lines || 5;
         document.getElementById('max-lines-value').textContent = s.max_lines || 5;
@@ -902,6 +906,9 @@ class App {
                 fontSize: settings.font_size || 16,
                 fontColor: fontColor,
             });
+
+            const fontDisplay = document.getElementById('font-size-display');
+            if (fontDisplay) fontDisplay.textContent = settings.font_size || 16;
 
             // Sync color trigger dot and palette active state
             const trigger = document.querySelector('.color-trigger');
@@ -1111,17 +1118,16 @@ class App {
         const labels = { system: 'System Audio', microphone: 'Microphone', both: 'System + Mic' };
         const label = labels[source] || source;
 
-        // If currently running, restart with new source
+        this.currentSource = source;
+        settingsManager.settings.audio_source = source;
+        this._updateSourceButtons();
+
         if (wasRunning) {
             this.stop().then(() => {
-                this.currentSource = source;
-                this._updateSourceButtons();
                 this._showToast(`Switched to ${label}`, 'success');
                 this.start();
             });
         } else {
-            this.currentSource = source;
-            this._updateSourceButtons();
             this._showToast(`Source: ${label}`, 'success');
         }
     }
@@ -1578,6 +1584,10 @@ class App {
             await this._saveTranscriptFile();
             this.transcriptUI.clearSession();
         }
+
+        // Clear display and show idle placeholder
+        this.transcriptUI.clear();
+        this.transcriptUI.showPlaceholder();
 
         // Reset session tracking
         this.sessionStartTime = null;

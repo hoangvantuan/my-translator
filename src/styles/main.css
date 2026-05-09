@@ -132,6 +132,11 @@ body {
   display: flex;
   align-items: center;
   gap: 6px;
+  background: rgba(255, 255, 255, 0.5);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border-radius: 10px;
+  padding: 3px 5px;
   opacity: 0;
   visibility: hidden;
   transition: opacity 0.3s ease 1.5s, visibility 0s 1.8s;
@@ -281,10 +286,12 @@ body {
 }
 
 .idle-start-btn {
+  -webkit-appearance: none;
+  appearance: none;
   padding: 14px 40px;
   border: none;
   border-radius: var(--radius-lg);
-  background: var(--accent);
+  background: #4f46e5;
   color: #fff;
   font-size: 16px;
   font-weight: 600;
@@ -372,8 +379,12 @@ body {
   align-items: center;
   gap: var(--toolbar-gap-item);
   padding: var(--toolbar-padding);
-  background: white;
+  background: rgba(255, 255, 255, 0.72);
+  backdrop-filter: blur(12px) saturate(1.4);
+  -webkit-backdrop-filter: blur(12px) saturate(1.4);
+  border: 1px solid rgba(255, 255, 255, 0.35);
   border-radius: var(--radius-lg);
+  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(0, 0, 0, 0.04);
   z-index: 50;
   opacity: 0;
   visibility: hidden;
@@ -755,10 +766,13 @@ body {
   display: flex;
   align-items: center;
   gap: 2px;
-  background: var(--bg-toolbar);
+  background: rgba(255, 255, 255, 0.72);
+  backdrop-filter: blur(12px) saturate(1.4);
+  -webkit-backdrop-filter: blur(12px) saturate(1.4);
+  border: 1px solid rgba(255, 255, 255, 0.35);
   border-radius: var(--radius-sm);
   padding: 2px 4px;
-  box-shadow: var(--shadow-overlay);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(0, 0, 0, 0.04);
 }
 
 .float-btn {
@@ -820,10 +834,13 @@ body {
   position: absolute;
   bottom: calc(100% + 6px);
   right: -4px;
-  background: var(--bg-toolbar);
+  background: rgba(255, 255, 255, 0.72);
+  backdrop-filter: blur(12px) saturate(1.4);
+  -webkit-backdrop-filter: blur(12px) saturate(1.4);
+  border: 1px solid rgba(255, 255, 255, 0.35);
   border-radius: var(--radius-md);
   padding: 8px;
-  box-shadow: var(--shadow-toolbar);
+  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(0, 0, 0, 0.04);
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 6px;
@@ -860,10 +877,10 @@ body {
 }
 
 .opacity-trigger {
-  width: 20px;
-  height: 20px;
+  width: 24px;
+  height: 24px;
   border-radius: 50%;
-  border: 2px solid transparent;
+  border: none;
   cursor: pointer;
   padding: 0;
   outline: none;
@@ -872,7 +889,6 @@ body {
   align-items: center;
   justify-content: center;
   color: var(--text-secondary);
-  box-shadow: var(--shadow-overlay);
   transition: all 0.15s;
 }
 
@@ -889,7 +905,10 @@ body {
   transform: none;
   border-radius: var(--radius-md);
   padding: 8px 12px;
-  box-shadow: var(--shadow-toolbar);
+  backdrop-filter: blur(12px) saturate(1.4);
+  -webkit-backdrop-filter: blur(12px) saturate(1.4);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(0, 0, 0, 0.04);
   display: flex;
   align-items: center;
   gap: 6px;
