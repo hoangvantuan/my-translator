@@ -293,30 +293,8 @@ class App {
         });
 
         // Start/Pause/Resume button
-        document.getElementById('btn-start').addEventListener('click', async () => {
-            if (this.isStarting) return;
-            try {
-                if (this.isRunning) {
-                    await this.pause();
-                } else if (this.isPaused) {
-                    this.isStarting = true;
-                    await this.resume();
-                } else {
-                    this.isStarting = true;
-                    await this.start();
-                }
-            } catch (err) {
-                console.error('[App] Start/Pause/Resume error:', err);
-                this._showToast(`Error: ${err}`, 'error');
-                this.isRunning = false;
-                this.isPaused = false;
-                this._updateStartButton();
-                this._updateStatus('error');
-                this.transcriptUI.clear();
-                this.transcriptUI.showPlaceholder();
-            } finally {
-                this.isStarting = false;
-            }
+        document.getElementById('btn-start').addEventListener('click', () => {
+            this._togglePlayState();
         });
 
         // Idle start button (same action as btn-start)
@@ -595,57 +573,13 @@ class App {
             // Cmd/Ctrl + Enter: Start/Pause/Resume (same as Space)
             if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
                 e.preventDefault();
-                if (this.isStarting) return;
-                (async () => {
-                    try {
-                        if (this.isRunning) {
-                            await this.pause();
-                        } else if (this.isPaused) {
-                            this.isStarting = true;
-                            await this.resume();
-                        } else {
-                            this.isStarting = true;
-                            await this.start();
-                        }
-                    } catch (err) {
-                        console.error('[App] Keyboard start/pause error:', err);
-                        this._showToast(`Error: ${err}`, 'error');
-                        this.isRunning = false;
-                        this.isPaused = false;
-                        this._updateStartButton();
-                        this._updateStatus('error');
-                    } finally {
-                        this.isStarting = false;
-                    }
-                })();
+                this._togglePlayState();
             }
 
             // Space: Start/Pause/Resume
             if (e.key === ' ' || e.code === 'Space') {
                 e.preventDefault();
-                if (this.isStarting) return;
-                (async () => {
-                    try {
-                        if (this.isRunning) {
-                            await this.pause();
-                        } else if (this.isPaused) {
-                            this.isStarting = true;
-                            await this.resume();
-                        } else {
-                            this.isStarting = true;
-                            await this.start();
-                        }
-                    } catch (err) {
-                        console.error('[App] Space shortcut error:', err);
-                        this._showToast(`Error: ${err}`, 'error');
-                        this.isRunning = false;
-                        this.isPaused = false;
-                        this._updateStartButton();
-                        this._updateStatus('error');
-                    } finally {
-                        this.isStarting = false;
-                    }
-                })();
+                this._togglePlayState();
             }
 
             // Escape: Stop session (when paused) or close settings
@@ -717,14 +651,18 @@ class App {
     async _showView(view) {
         const target = VIEW_SIZES[view];
         if (target) {
-            const { LogicalSize } = window.__TAURI__.window;
-            const factor = await this.appWindow.scaleFactor();
-            const current = await this.appWindow.innerSize();
-            const currentW = Math.round(current.width / factor);
-            const currentH = Math.round(current.height / factor);
+            try {
+                const { LogicalSize } = window.__TAURI__.window;
+                const factor = await this.appWindow.scaleFactor();
+                const current = await this.appWindow.innerSize();
+                const currentW = Math.round(current.width / factor);
+                const currentH = Math.round(current.height / factor);
 
-            if (currentW !== target.width || currentH !== target.height) {
-                await this.appWindow.setSize(new LogicalSize(target.width, target.height));
+                if (currentW !== target.width || currentH !== target.height) {
+                    await this.appWindow.setSize(new LogicalSize(target.width, target.height));
+                }
+            } catch (err) {
+                console.error('Failed to resize window:', err);
             }
         }
 
@@ -1646,6 +1584,30 @@ class App {
         this.isPaused = false;
         this._updateStartButton();
         await this.start();
+    }
+
+    async _togglePlayState() {
+        if (this.isStarting) return;
+        try {
+            if (this.isRunning) {
+                await this.pause();
+            } else if (this.isPaused) {
+                this.isStarting = true;
+                await this.resume();
+            } else {
+                this.isStarting = true;
+                await this.start();
+            }
+        } catch (err) {
+            console.error('[App] Toggle play state error:', err);
+            this._showToast(`Error: ${err}`, 'error');
+            this.isRunning = false;
+            this.isPaused = false;
+            this._updateStartButton();
+            this._updateStatus('error');
+        } finally {
+            this.isStarting = false;
+        }
     }
 
     _updateStartButton() {
