@@ -133,12 +133,13 @@ body {
   align-items: center;
   gap: 6px;
   opacity: 0;
-  transition: opacity var(--transition-fast);
+  transition: opacity 0.3s ease 1.5s;
   z-index: 10;
 }
 
 #overlay-view:hover .window-controls {
   opacity: 1;
+  transition: opacity 0.15s ease;
 }
 
 .wc-btn {
@@ -296,6 +297,66 @@ body {
   transform: scale(0.96);
 }
 
+/* Paused overlay */
+.paused-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(2px);
+  z-index: 2;
+}
+
+.paused-overlay.hidden {
+  display: none;
+}
+
+.paused-buttons {
+  display: flex;
+  gap: 16px;
+  -webkit-app-region: no-drag;
+}
+
+.paused-btn {
+  padding: 14px 32px;
+  border: none;
+  border-radius: var(--radius-lg);
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.paused-btn-resume {
+  background: var(--accent);
+  color: #fff;
+}
+
+.paused-btn-resume:hover {
+  background: #4338ca;
+  box-shadow: 0 2px 8px rgba(79, 70, 229, 0.3);
+}
+
+.paused-btn-resume:active {
+  transform: scale(0.96);
+}
+
+.paused-btn-stop {
+  background: rgba(255, 255, 255, 0.15);
+  color: var(--text-primary);
+}
+
+.paused-btn-stop:hover {
+  background: rgba(239, 68, 68, 0.8);
+  color: #fff;
+}
+
+.paused-btn-stop:active {
+  transform: scale(0.96);
+}
+
 /* ══════════════ FLOATING TOOLBAR ══════════════ */
 
 .floating-toolbar {
@@ -310,15 +371,16 @@ body {
   border-radius: var(--radius-lg);
   z-index: 50;
   opacity: 0;
-  pointer-events: none;
-  transition: opacity var(--transition-fast), transform var(--transition-fast);
+  visibility: hidden;
+  transition: opacity 0.3s ease 1.5s, visibility 0s 1.8s, transform 0.3s ease 1.5s;
   transform: translateX(-50%) translateY(4px);
 }
 
 #overlay-view:hover .floating-toolbar {
   opacity: 1;
-  pointer-events: auto;
+  visibility: visible;
   transform: translateX(-50%) translateY(0);
+  transition: opacity 0.15s ease, visibility 0s, transform 0.15s ease;
 }
 
 .toolbar-separator {
@@ -351,7 +413,7 @@ body {
   border: none;
   border-radius: var(--radius-sm);
   background: transparent;
-  color: var(--text-disabled);
+  color: var(--text-secondary);
   cursor: pointer;
   transition: all var(--transition-fast);
   -webkit-app-region: no-drag;
@@ -389,6 +451,7 @@ body {
 /* Pin active */
 #btn-pin.active {
   color: var(--accent);
+  background: var(--accent-light);
 }
 
 /* TTS active */
@@ -667,17 +730,18 @@ body {
 .floating-controls {
   position: absolute;
   bottom: 24px;
-  right: 8px;
+  right: 16px;
   display: flex;
   align-items: center;
   gap: 6px;
   z-index: 10;
   opacity: 0;
-  transition: opacity 0.2s;
+  transition: opacity 0.3s ease 1.5s;
 }
 
 #overlay-view:hover .floating-controls {
   opacity: 1;
+  transition: opacity 0.15s ease;
 }
 
 .font-controls {
@@ -808,13 +872,14 @@ body {
 .opacity-trigger:hover {
   transform: scale(1.15);
   color: var(--text-primary);
+  background: var(--bg-hover);
 }
 
 .opacity-popover {
   position: absolute;
   bottom: calc(100% + 8px);
-  left: 50%;
-  transform: translateX(-50%);
+  right: -8px;
+  transform: none;
   background: var(--bg-toolbar);
   border-radius: var(--radius-md);
   padding: 8px 12px;
@@ -830,8 +895,7 @@ body {
   content: '';
   position: absolute;
   top: 100%;
-  left: 50%;
-  transform: translateX(-50%);
+  right: 12px;
   border: 5px solid transparent;
   border-top-color: var(--bg-toolbar);
 }
