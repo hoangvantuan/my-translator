@@ -15,6 +15,12 @@ import { updater } from './updater.js';
 const { invoke } = window.__TAURI__.core;
 const { getCurrentWindow } = window.__TAURI__.window;
 
+const VIEW_SIZES = {
+    overlay:  { width: 600, height: 400 },
+    settings: { width: 800, height: 600 },
+    sessions: { width: 800, height: 600 },
+};
+
 class App {
     constructor() {
         this.isRunning = false;
@@ -708,7 +714,20 @@ class App {
 
     // ─── Views ──────────────────────────────────────────────
 
-    _showView(view) {
+    async _showView(view) {
+        const target = VIEW_SIZES[view];
+        if (target) {
+            const { LogicalSize } = window.__TAURI__.window;
+            const factor = await this.appWindow.scaleFactor();
+            const current = await this.appWindow.innerSize();
+            const currentW = Math.round(current.width / factor);
+            const currentH = Math.round(current.height / factor);
+
+            if (currentW !== target.width || currentH !== target.height) {
+                await this.appWindow.setSize(new LogicalSize(target.width, target.height));
+            }
+        }
+
         document.getElementById('overlay-view').classList.toggle('active', view === 'overlay');
         document.getElementById('settings-view').classList.toggle('active', view === 'settings');
         document.getElementById('sessions-view').classList.toggle('active', view === 'sessions');
