@@ -32,6 +32,8 @@ export class TranscriptUI {
 
         this._isSyncingScroll = false;
         this._scrollSyncCleanup = null;
+        this._renderScheduled = false;
+        this._renderToken = 0;
     }
 
     /**
@@ -174,6 +176,7 @@ export class TranscriptUI {
      * Show placeholder state
      */
     showPlaceholder() {
+        this._cancelScheduledRender();
         this.container.innerHTML = `
       <div class="transcript-placeholder">
         <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" opacity="0.4">
@@ -350,6 +353,7 @@ export class TranscriptUI {
      * sessionLog is NOT cleared — use clearSession() explicitly.
      */
     clear() {
+        this._cancelScheduledRender();
         this.container.innerHTML = '';
         this.segments = [];
         this.provisionalText = '';
@@ -385,6 +389,29 @@ export class TranscriptUI {
     }
 
     _render() {
+        this._scheduleRender();
+    }
+
+    _scheduleRender() {
+        if (this._renderScheduled) return;
+
+        this._renderScheduled = true;
+        const token = ++this._renderToken;
+
+        requestAnimationFrame(() => {
+            if (token !== this._renderToken) return;
+
+            this._renderScheduled = false;
+            this._renderNow();
+        });
+    }
+
+    _cancelScheduledRender() {
+        this._renderToken += 1;
+        this._renderScheduled = false;
+    }
+
+    _renderNow() {
         this._ensureContent();
         this._trimSegments();
 
