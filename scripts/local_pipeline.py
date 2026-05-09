@@ -367,6 +367,19 @@ class LocalPipeline:
         finally:
             os.unlink(wav_path)
 
+    def _compact_audio_buffer(self, processed_pos):
+        """Drop processed audio bytes and reset processed_pos to buffer-relative zero."""
+        if processed_pos <= 0:
+            return 0
+
+        with self.lock:
+            if processed_pos >= len(self.audio_buffer):
+                self.audio_buffer.clear()
+            else:
+                del self.audio_buffer[:processed_pos]
+
+        return 0
+
     def stdin_reader(self):
         """Read PCM bytes from stdin into buffer."""
         try:
@@ -402,6 +415,7 @@ class LocalPipeline:
 
                 self._process_chunk(chunk)
                 processed_pos += self.stride_bytes
+                processed_pos = self._compact_audio_buffer(processed_pos)
 
         # Process remaining audio
         with self.lock:
