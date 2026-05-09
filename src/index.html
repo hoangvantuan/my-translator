@@ -505,10 +505,14 @@
             <input type="range" id="range-max-lines" min="2" max="15" value="5" />
             <span id="max-lines-value" class="range-value">5</span>
           </div>
-          <label class="checkbox-option" style="margin-top: 8px;">
-            <input type="checkbox" id="check-show-original" checked />
-            <span class="checkbox-label">Show original text</span>
-          </label>
+          <div style="margin-top: 8px;">
+            <span class="field-label">Original Text</span>
+            <div class="radio-group" style="margin-top: 4px;">
+              <label class="radio-option"><input type="radio" name="show-original" value="off" /><span class="radio-label">Off</span></label>
+              <label class="radio-option"><input type="radio" name="show-original" value="below" checked /><span class="radio-label">Below</span></label>
+              <label class="radio-option"><input type="radio" name="show-original" value="dual" /><span class="radio-label">Dual</span></label>
+            </div>
+          </div>
         </div>
       </div>
 

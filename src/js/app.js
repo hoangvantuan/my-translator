@@ -628,7 +628,9 @@ class App {
         document.getElementById('range-max-lines').value = s.max_lines || 5;
         document.getElementById('max-lines-value').textContent = s.max_lines || 5;
 
-        document.getElementById('check-show-original').checked = s.show_original !== false;
+        const showOriginalVal = s.show_original || 'below';
+        const showOriginalRadio = document.querySelector(`input[name="show-original"][value="${showOriginalVal}"]`);
+        if (showOriginalRadio) showOriginalRadio.checked = true;
 
         // Custom context (rich format)
         const ctx = s.custom_context;
@@ -703,7 +705,7 @@ class App {
             overlay_opacity: parseInt(document.getElementById('range-opacity').value) / 100,
             font_size: parseInt(document.getElementById('range-font-size').value),
             max_lines: parseInt(document.getElementById('range-max-lines').value),
-            show_original: document.getElementById('check-show-original').checked,
+            show_original: document.querySelector('input[name="show-original"]:checked')?.value || 'below',
             custom_context: null,
         };
 
@@ -766,15 +768,18 @@ class App {
     _applySettings(settings) {
         // Update overlay opacity
         const overlayView = document.getElementById('overlay-view');
-        overlayView.style.opacity = settings.overlay_opacity || 0.85;
+        const opacity = settings.overlay_opacity !== undefined ? settings.overlay_opacity : 0.85;
+        overlayView.style.backgroundColor = `rgba(255, 255, 255, ${opacity})`;
 
         // Update transcript UI
         if (this.transcriptUI) {
+            const showOriginal = settings.show_original || 'below';
             this.transcriptUI.configure({
                 maxLines: settings.max_lines || 5,
-                showOriginal: settings.show_original !== false,
+                showOriginal: showOriginal,
                 fontSize: settings.font_size || 16,
             });
+            this._updateViewModeButton(showOriginal);
         }
 
         // Update current source button states
@@ -1600,11 +1605,26 @@ class App {
     }
 
     _toggleViewMode() {
-        const isDual = this.transcriptUI.viewMode === 'dual';
-        const newMode = isDual ? 'single' : 'dual';
-        this.transcriptUI.configure({ viewMode: newMode });
+        const cycle = { off: 'below', below: 'dual', dual: 'off' };
+        const current = this.transcriptUI.showOriginal || 'below';
+        const next = cycle[current] || 'below';
+        this.transcriptUI.configure({ showOriginal: next });
+        this._updateViewModeButton(next);
+    }
+
+    _updateViewModeButton(mode) {
         const btn = document.getElementById('btn-view-mode');
-        if (btn) btn.classList.toggle('active', newMode === 'dual');
+        const btnFloat = document.getElementById('btn-view-mode-float');
+        const titles = { off: 'Original: off', below: 'Original: below translation', dual: 'Original: dual panel' };
+        const title = titles[mode] || titles.below;
+        if (btn) {
+            btn.classList.toggle('active', mode !== 'off');
+            btn.title = title;
+        }
+        if (btnFloat) {
+            btnFloat.classList.toggle('active', mode !== 'off');
+            btnFloat.title = title;
+        }
     }
 
     _adjustFontSize(delta) {
