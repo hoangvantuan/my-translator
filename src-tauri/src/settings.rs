@@ -18,6 +18,36 @@ pub struct CustomContext {
     pub translation_terms: Vec<TranslationTerm>,
 }
 
+fn deserialize_show_original<'de, D>(deserializer: D) -> Result<String, D::Error>
+where
+    D: serde::Deserializer<'de>,
+{
+    use serde::de;
+
+    struct ShowOriginalVisitor;
+
+    impl<'de> de::Visitor<'de> for ShowOriginalVisitor {
+        type Value = String;
+
+        fn expecting(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
+            formatter.write_str("a boolean or string (\"off\", \"below\", \"dual\")")
+        }
+
+        fn visit_bool<E: de::Error>(self, v: bool) -> Result<String, E> {
+            Ok(if v { "below".to_string() } else { "off".to_string() })
+        }
+
+        fn visit_str<E: de::Error>(self, v: &str) -> Result<String, E> {
+            match v {
+                "off" | "below" | "dual" => Ok(v.to_string()),
+                _ => Ok("below".to_string()),
+            }
+        }
+    }
+
+    deserializer.deserialize_any(ShowOriginalVisitor)
+}
+
 /// App settings — persisted to JSON
 #[derive(Debug, Serialize, Deserialize, Clone)]
 #[serde(default)]
@@ -36,8 +66,9 @@ pub struct Settings {
     pub font_size: u32,
     /// Max transcript lines to display
     pub max_lines: u32,
-    /// Whether to show original text alongside translation
-    pub show_original: bool,
+    /// How to show original text: "off" | "below" | "dual"
+    #[serde(deserialize_with = "deserialize_show_original")]
+    pub show_original: String,
     /// Translation mode: "soniox" (cloud API) or "local" (MLX models)
     pub translation_mode: String,
     /// Optional custom context for better transcription
@@ -76,7 +107,7 @@ impl Default for Settings {
             overlay_opacity: 0.85,
             font_size: 16,
             max_lines: 5,
-            show_original: true,
+            show_original: "below".to_string(),
             translation_mode: "soniox".to_string(),
             custom_context: None,
             elevenlabs_api_key: String::new(),
