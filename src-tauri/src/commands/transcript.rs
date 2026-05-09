@@ -57,6 +57,9 @@ pub struct TranscriptEntry {
     path: String,
     created_at: String,
     size_bytes: u64,
+    duration: Option<String>,
+    source_lang: Option<String>,
+    target_lang: Option<String>,
 }
 
 /// List all saved transcript sessions, newest first
@@ -85,11 +88,36 @@ pub fn list_transcripts(app: AppHandle) -> Result<Vec<TranscriptEntry>, String> 
                     base.to_string()
                 }
             };
+            let (duration, source_lang, target_lang) = {
+                let content = fs::read_to_string(entry.path()).unwrap_or_default();
+                let mut dur = None;
+                let mut src = None;
+                let mut tgt = None;
+                if content.starts_with("---") {
+                    if let Some(end) = content[3..].find("---") {
+                        let yaml = &content[3..3 + end];
+                        for line in yaml.lines() {
+                            if let Some(val) = line.strip_prefix("duration:") {
+                                dur = Some(val.trim().to_string());
+                            } else if let Some(val) = line.strip_prefix("source_lang:") {
+                                src = Some(val.trim().to_string());
+                            } else if let Some(val) = line.strip_prefix("target_lang:") {
+                                tgt = Some(val.trim().to_string());
+                            }
+                        }
+                    }
+                }
+                (dur, src, tgt)
+            };
+
             Some(TranscriptEntry {
                 filename,
                 path,
                 created_at,
                 size_bytes,
+                duration,
+                source_lang,
+                target_lang,
             })
         })
         .collect();

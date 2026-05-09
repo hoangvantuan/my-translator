@@ -1,3 +1,39 @@
+# UI Redesign: Light/Clean Subtitle Strip — Implementation Plan
+
+> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+
+**Goal:** Chuyển toàn bộ UI từ dark glassmorphism sang light/clean theme (Linear/Arc Browser style), đổi overlay từ fixed control bar sang floating toolbar xuất hiện khi hover.
+
+**Architecture:** 3 file thay đổi: `main.css` (viết lại hoàn toàn), `index.html` (restructure overlay view, giữ nguyên Settings/Sessions structure), `ui.js` (cập nhật hover logic + inline style colors). Giữ nguyên tất cả button IDs để `app.js` và các JS khác không cần thay đổi. Design tokens mới trong CSS `:root`.
+
+**Tech Stack:** HTML, CSS (vanilla, CSS custom properties), vanilla JS (no framework)
+
+---
+
+## File Structure
+
+| File | Thay đổi | Trách nhiệm |
+|------|----------|-------------|
+| `src/styles/main.css` | Viết lại hoàn toàn (~1900 dòng) | Tất cả styling: design tokens, overlay, toolbar, transcript, floating controls, settings, sessions, modal, animations |
+| `src/index.html` | Restructure overlay view | Bỏ fixed `.control-bar` trong `#drag-region`, thêm drag handle + floating toolbar + status label. Settings/Sessions giữ nguyên HTML structure |
+| `src/js/ui.js` | Cập nhật 2 chỗ | 1) Inline style color trong `showStatusMessage()` cần đổi sang light theme. 2) Transcript flow colors match light theme |
+
+**Không thay đổi:** `app.js`, `settings.js`, `soniox.js`, TTS modules, `updater.js`, `audio-player.js`, Rust backend, Tauri config.
+
+**Ràng buộc quan trọng:** Tất cả button IDs (`#btn-settings`, `#btn-start`, `#btn-source-system`, `#btn-source-mic`, `#btn-source-both`, `#btn-tts`, `#btn-clear`, `#btn-copy`, `#btn-open-transcripts`, `#btn-sessions`, `#btn-compact`, `#btn-pin`, `#btn-minimize`, `#btn-close`, v.v.) PHẢI giữ nguyên. `app.js` dùng 192+ `getElementById` calls.
+
+---
+
+### Task 1: CSS Design Tokens + Base Reset
+
+**Files:**
+- Modify: `src/styles/main.css:1-63` (thay toàn bộ `:root` và base styles)
+
+- [ ] **Step 1: Thay thế toàn bộ `:root` variables**
+
+Xóa toàn bộ nội dung `main.css` hiện tại. Viết mới từ đầu, bắt đầu với reset và design tokens:
+
+```css
 /* My Translator — Light/Clean Theme */
 
 *,
@@ -53,7 +89,7 @@
   --icon-stroke: 2;
 
   /* Shadows */
-  --shadow-overlay: 0 1px 8px rgba(0, 0, 0, 0.07);
+  --shadow-overlay: 0 1px 8px rgba(0, 0, 0, 0.07), 0 0 0 1px rgba(0, 0, 0, 0.04);
   --shadow-toolbar: 0 2px 12px rgba(0, 0, 0, 0.08), 0 0 0 1px rgba(0, 0, 0, 0.04);
 
   /* Transitions */
@@ -91,16 +127,255 @@ body {
   from { opacity: 0; }
   to { opacity: 1; }
 }
+```
 
+- [ ] **Step 2: Mở app xác nhận không bị lỗi parse CSS**
+
+Run: `cargo tauri dev` (hoặc dev server đang chạy)
+Expected: App mở được, styles trắng/broken nhưng không crash
+
+- [ ] **Step 3: Commit**
+
+```bash
+git add src/styles/main.css
+git commit -m "refactor(ui): replace dark theme tokens with light/clean design tokens"
+```
+
+---
+
+### Task 2: HTML Overlay Restructure
+
+**Files:**
+- Modify: `src/index.html:16-178` (toàn bộ `#overlay-view`)
+
+Thay đổi chính:
+1. `#drag-region` chỉ còn drag handle (thanh nhỏ 32x3px) + chấm status ẩn
+2. Thêm `#floating-toolbar` nằm absolute phía trên content
+3. Thêm `#status-label` trong content card
+4. Giữ nguyên `#transcript-container`, `.floating-controls`, `#resize-handle`
+5. Tất cả button IDs giữ nguyên, chỉ dời vị trí trong DOM
+
+- [ ] **Step 1: Restructure `#overlay-view` trong `index.html`**
+
+Thay toàn bộ `#overlay-view` (line 16-178) bằng:
+
+```html
+  <!-- OVERLAY VIEW -->
+  <div id="overlay-view" class="view active">
+    <!-- Drag handle (top center) -->
+    <div id="drag-region" data-tauri-drag-region>
+      <div class="drag-handle" data-tauri-drag-region></div>
+    </div>
+
+    <!-- Status dot (top right corner, visible when translating) -->
+    <div id="status-indicator" class="status-dot disconnected"></div>
+
+    <!-- Status label (top left, visible on hover when translating) -->
+    <div id="status-label" class="status-label">
+      <span class="status-label-dot"></span>
+      <span id="status-text" class="status-text"></span>
+    </div>
+
+    <!-- Floating toolbar (appears on hover, above content) -->
+    <div id="floating-toolbar" class="floating-toolbar">
+      <!-- Group: Source -->
+      <div class="toolbar-group source-controls">
+        <button id="btn-source-system" class="toolbar-btn active" title="System Audio (⌘1)">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
+            <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07" />
+          </svg>
+        </button>
+        <button id="btn-source-mic" class="toolbar-btn" title="Microphone (⌘2)">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z" />
+            <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
+            <line x1="12" y1="19" x2="12" y2="23" />
+            <line x1="8" y1="23" x2="16" y2="23" />
+          </svg>
+        </button>
+        <button id="btn-source-both" class="toolbar-btn" title="System + Mic (⌘3)">
+          <svg width="16" height="14" viewBox="0 0 28 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polygon points="9 6 5 9 2 9 2 15 5 15 9 18 9 6" />
+            <path d="M12.5 9.5a3 3 0 0 1 0 5" />
+            <path d="M20 4a2.5 2.5 0 0 0-2.5 2.5v5a2.5 2.5 0 0 0 5 0v-5A2.5 2.5 0 0 0 20 4z" />
+            <path d="M25 10v1.5a5 5 0 0 1-10 0V10" />
+          </svg>
+        </button>
+      </div>
+
+      <div class="toolbar-separator"></div>
+
+      <!-- Group: Display -->
+      <div class="toolbar-group">
+        <button id="btn-tts" class="toolbar-btn" title="TTS Narration (⌘T)">
+          <svg id="icon-tts-off" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+            <line x1="9" y1="10" x2="15" y2="10" />
+          </svg>
+          <svg id="icon-tts-on" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:none">
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+            <path d="M9 10h2" /><path d="M13 8v4" /><path d="M15 10h1" />
+          </svg>
+        </button>
+        <button id="btn-font-size-toolbar" class="toolbar-btn" title="Font size">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M4 7V4h16v3" /><path d="M9 20h6" /><path d="M12 4v16" />
+          </svg>
+        </button>
+        <button id="btn-view-mode" class="toolbar-btn" title="Toggle dual view">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="3" width="7" height="18" rx="1" />
+            <rect x="14" y="3" width="7" height="18" rx="1" />
+          </svg>
+        </button>
+      </div>
+
+      <div class="toolbar-separator"></div>
+
+      <!-- Group: Action -->
+      <div class="toolbar-group">
+        <button id="btn-copy" class="toolbar-btn" title="Copy transcript">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+          </svg>
+        </button>
+        <button id="btn-sessions" class="toolbar-btn" title="View saved sessions">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10" />
+            <polyline points="12 6 12 12 16 14" />
+          </svg>
+        </button>
+        <button id="btn-settings" class="toolbar-btn" title="Settings">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="3" />
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" />
+          </svg>
+          <span id="settings-badge" class="settings-badge" style="display:none"></span>
+        </button>
+      </div>
+
+      <div class="toolbar-separator"></div>
+
+      <!-- Group: Control -->
+      <div class="toolbar-group">
+        <button id="btn-start" class="toolbar-btn toolbar-btn-stop" title="Stop (Space)">
+          <svg id="icon-play" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polygon points="5 3 19 12 5 21 5 3" fill="currentColor" />
+          </svg>
+          <svg id="icon-stop" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:none">
+            <rect x="4" y="4" width="16" height="16" rx="2" fill="currentColor" />
+          </svg>
+        </button>
+        <button id="btn-pin" class="toolbar-btn active" title="Pin on top">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 17v5" />
+            <path d="M9 10.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24V17h14v-1.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V6h1a2 2 0 0 0 0-4H8a2 2 0 0 0 0 4h1v4.76z" />
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Idle state overlay (shown when not translating) -->
+    <div id="idle-overlay" class="idle-overlay">
+      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" opacity="0.4">
+        <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z" />
+        <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
+        <line x1="12" y1="19" x2="12" y2="23" />
+        <line x1="8" y1="23" x2="16" y2="23" />
+      </svg>
+      <p class="idle-text">Nhấn ▶ để bắt đầu dịch</p>
+      <button id="btn-idle-start" class="idle-start-btn">Bắt đầu</button>
+    </div>
+
+    <!-- Transcript Area -->
+    <div id="transcript-container" data-tauri-drag-region>
+      <div id="transcript-content" data-tauri-drag-region>
+        <div class="transcript-placeholder">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" opacity="0.4">
+            <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z" />
+            <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
+            <line x1="12" y1="19" x2="12" y2="23" />
+            <line x1="8" y1="23" x2="16" y2="23" />
+          </svg>
+          <p>Press ▶ to start translating</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Floating controls (bottom-right, shown on hover) -->
+    <div class="floating-controls">
+      <div class="font-controls">
+        <button id="btn-font-down" class="float-btn" title="Decrease font size">A−</button>
+        <span id="font-size-display" class="font-size-label">16</span>
+        <button id="btn-font-up" class="float-btn" title="Increase font size">A+</button>
+      </div>
+      <div class="color-controls">
+        <button class="color-dot active" data-color="#111827" title="Dark" style="background:#111827;"></button>
+        <button class="color-dot" data-color="#92400e" title="Yellow" style="background:#92400e;"></button>
+        <button class="color-dot" data-color="#164e63" title="Cyan" style="background:#164e63;"></button>
+      </div>
+      <button id="btn-view-mode-float" class="float-btn" title="Toggle dual view">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="3" y="3" width="7" height="18" rx="1" />
+          <rect x="14" y="3" width="7" height="18" rx="1" />
+        </svg>
+      </button>
+    </div>
+
+    <!-- Hidden buttons (keep IDs for app.js, but not visible in new design) -->
+    <div style="display:none">
+      <button id="btn-clear"></button>
+      <button id="btn-open-transcripts"></button>
+      <button id="btn-compact"></button>
+      <button id="btn-minimize"></button>
+      <button id="btn-close"></button>
+    </div>
+
+    <!-- Resize Handle -->
+    <div id="resize-handle"></div>
+  </div>
+```
+
+**Ghi chú quan trọng:**
+- Các button không còn trong toolbar mới (`btn-clear`, `btn-open-transcripts`, `btn-compact`, `btn-minimize`, `btn-close`) được giữ ẩn trong hidden div để `app.js` không lỗi getElementById.
+- `#btn-idle-start` cần wire trong `app.js` (hoặc cùng handler với `#btn-start`).
+- `.source-btn` đổi thành `.toolbar-btn` cho thống nhất. `app.js` tham chiếu qua ID nên không ảnh hưởng.
+- Color dots đổi màu phù hợp light theme: `#111827` (dark text), `#92400e` (amber), `#164e63` (teal).
+
+- [ ] **Step 2: Xác nhận app.js không lỗi**
+
+Run: Mở app, kiểm tra console không có null reference errors.
+Expected: Tất cả `getElementById` trả về element (không null).
+
+- [ ] **Step 3: Commit**
+
+```bash
+git add src/index.html
+git commit -m "refactor(ui): restructure overlay HTML for floating toolbar design"
+```
+
+---
+
+### Task 3: CSS Overlay View (card, drag handle, status)
+
+**Files:**
+- Modify: `src/styles/main.css` (append sau base styles)
+
+- [ ] **Step 1: Thêm CSS cho overlay card, drag handle, status**
+
+Append vào `main.css` sau phần base styles:
+
+```css
 /* ══════════════ OVERLAY VIEW ══════════════ */
 
 #overlay-view {
   position: relative;
-  background: transparent;
+  background: var(--bg-primary);
   border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-overlay);
   overflow: visible;
-  margin-top: 48px;
-  height: calc(100% - 48px);
 }
 
 /* Drag Region */
@@ -124,77 +399,13 @@ body {
   background: rgba(0, 0, 0, 0.2);
 }
 
-/* Window Controls (macOS-style dots) */
-.window-controls {
-  position: absolute;
-  left: 12px;
-  top: 15px;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  opacity: 0;
-  transition: opacity 0.3s ease 1.5s;
-  z-index: 10;
-}
-
-#overlay-view:hover .window-controls {
-  opacity: 1;
-  transition: opacity 0.15s ease;
-}
-
-.wc-btn {
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  border: none;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0;
-  -webkit-app-region: no-drag;
-  transition: all var(--transition-fast);
-}
-
-.wc-btn svg {
-  opacity: 0;
-  transition: opacity var(--transition-fast);
-}
-
-.window-controls:hover .wc-btn svg {
-  opacity: 1;
-}
-
-.wc-close {
-  background: #ff5f57;
-  color: #4a0002;
-}
-
-.wc-minimize {
-  background: #febc2e;
-  color: #5a3e00;
-}
-
-.wc-fullscreen {
-  background: #28c840;
-  color: #003a00;
-}
-
-.wc-close:hover { background: #ff3b30; }
-.wc-minimize:hover { background: #f5a623; }
-.wc-fullscreen:hover { background: #1aad2e; }
-
-.wc-btn:active {
-  transform: scale(0.85);
-}
-
 /* Status dot (top right) */
 #overlay-view > .status-dot {
   position: absolute;
-  top: 15px;
-  right: 15px;
-  width: 8px;
-  height: 8px;
+  top: 8px;
+  right: 10px;
+  width: 5px;
+  height: 5px;
   border-radius: 50%;
   z-index: 5;
   transition: background var(--transition-normal);
@@ -224,11 +435,11 @@ body {
   50% { opacity: 0.4; }
 }
 
-/* Status label (next to status dot, top right) */
+/* Status label (top left, visible on hover when translating) */
 .status-label {
   position: absolute;
-  top: 12px;
-  right: 28px;
+  top: 6px;
+  left: 12px;
   display: flex;
   align-items: center;
   gap: 4px;
@@ -243,7 +454,10 @@ body {
 }
 
 .status-label-dot {
-  display: none;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--success);
 }
 
 .status-label .status-text {
@@ -276,13 +490,13 @@ body {
 }
 
 .idle-start-btn {
-  padding: 14px 40px;
+  padding: 8px 24px;
   border: none;
-  border-radius: var(--radius-lg);
+  border-radius: var(--radius-md);
   background: var(--accent);
   color: #fff;
-  font-size: 16px;
-  font-weight: 600;
+  font-size: 13px;
+  font-weight: 500;
   cursor: pointer;
   transition: all var(--transition-fast);
   -webkit-app-region: no-drag;
@@ -296,98 +510,64 @@ body {
 .idle-start-btn:active {
   transform: scale(0.96);
 }
+```
 
-/* Paused overlay */
-.paused-overlay {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: rgba(0, 0, 0, 0.3);
-  backdrop-filter: blur(2px);
-  z-index: 2;
-}
+- [ ] **Step 2: Verify visual — card trắng, drag handle visible, idle state centered**
 
-.paused-overlay.hidden {
-  display: none;
-}
+Run: Mở app
+Expected: Card nền trắng, drag handle nhỏ ở top center, idle overlay hiện giữa card
 
-.paused-buttons {
-  display: flex;
-  gap: 16px;
-  -webkit-app-region: no-drag;
-}
+- [ ] **Step 3: Commit**
 
-.paused-btn {
-  padding: 14px 32px;
-  border: none;
-  border-radius: var(--radius-lg);
-  font-size: 15px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all var(--transition-fast);
-}
+```bash
+git add src/styles/main.css
+git commit -m "style(ui): add overlay card, drag handle, status dot, and idle state styles"
+```
 
-.paused-btn-resume {
-  background: var(--accent);
-  color: #fff;
-}
+---
 
-.paused-btn-resume:hover {
-  background: #4338ca;
-  box-shadow: 0 2px 8px rgba(79, 70, 229, 0.3);
-}
+### Task 4: CSS Floating Toolbar
 
-.paused-btn-resume:active {
-  transform: scale(0.96);
-}
+**Files:**
+- Modify: `src/styles/main.css` (append)
 
-.paused-btn-stop {
-  background: rgba(255, 255, 255, 0.15);
-  color: var(--text-primary);
-}
+- [ ] **Step 1: Thêm CSS cho floating toolbar**
 
-.paused-btn-stop:hover {
-  background: rgba(239, 68, 68, 0.8);
-  color: #fff;
-}
+Append vào `main.css`:
 
-.paused-btn-stop:active {
-  transform: scale(0.96);
-}
-
+```css
 /* ══════════════ FLOATING TOOLBAR ══════════════ */
 
 .floating-toolbar {
   position: absolute;
-  bottom: calc(100% + 6px);
+  top: -52px;
   left: 50%;
+  transform: translateX(-50%);
   display: flex;
   align-items: center;
   gap: var(--toolbar-gap-item);
   padding: var(--toolbar-padding);
-  background: white;
+  background: var(--bg-toolbar);
   border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-toolbar);
   z-index: 50;
   opacity: 0;
-  visibility: hidden;
-  transition: opacity 0.3s ease 1.5s, visibility 0s 1.8s, transform 0.3s ease 1.5s;
+  pointer-events: none;
+  transition: opacity var(--transition-fast), transform var(--transition-fast);
   transform: translateX(-50%) translateY(4px);
 }
 
-#overlay-view:hover .floating-toolbar {
+#overlay-view.is-recording:hover .floating-toolbar {
   opacity: 1;
-  visibility: visible;
+  pointer-events: auto;
   transform: translateX(-50%) translateY(0);
-  transition: opacity 0.15s ease, visibility 0s, transform 0.15s ease;
 }
 
 .toolbar-separator {
   width: 1px;
-  height: 16px;
-  background: rgba(0, 0, 0, 0.08);
-  margin: 0 2px;
+  height: 20px;
+  background: var(--border-light);
+  margin: 0 4px;
   flex-shrink: 0;
 }
 
@@ -413,7 +593,7 @@ body {
   border: none;
   border-radius: var(--radius-sm);
   background: transparent;
-  color: var(--text-secondary);
+  color: var(--text-disabled);
   cursor: pointer;
   transition: all var(--transition-fast);
   -webkit-app-region: no-drag;
@@ -451,7 +631,6 @@ body {
 /* Pin active */
 #btn-pin.active {
   color: var(--accent);
-  background: var(--accent-light);
 }
 
 /* TTS active */
@@ -459,7 +638,32 @@ body {
   color: var(--accent);
   background: var(--accent-light);
 }
+```
 
+- [ ] **Step 2: Verify — hover card, toolbar slides down above it**
+
+Run: Mở app, hover lên overlay card
+Expected: Toolbar trắng xuất hiện phía trên card với animation slideDown nhẹ
+
+- [ ] **Step 3: Commit**
+
+```bash
+git add src/styles/main.css
+git commit -m "style(ui): add floating toolbar with hover reveal animation"
+```
+
+---
+
+### Task 5: CSS Transcript Content + Dual View
+
+**Files:**
+- Modify: `src/styles/main.css` (append)
+
+- [ ] **Step 1: Thêm CSS cho transcript container, text styles, dual view**
+
+Append vào `main.css`:
+
+```css
 /* ══════════════ TRANSCRIPT ══════════════ */
 
 #transcript-container {
@@ -579,28 +783,25 @@ body {
   display: block;
   color: var(--transcript-font-color, var(--text-primary));
   font-weight: 450;
-  font-size: 1em;
-  text-shadow: var(--transcript-text-shadow, none);
+  font-size: 16px;
 }
 
 /* Original text */
 .seg-original {
   display: block;
-  color: var(--transcript-font-color-muted, var(--text-original));
+  color: var(--text-original);
   font-weight: 400;
-  font-size: 0.75em;
+  font-size: 12px;
   margin-top: 8px;
   margin-bottom: 2px;
-  text-shadow: var(--transcript-text-shadow, none);
 }
 
 /* Provisional text */
 .seg-provisional {
   display: block;
-  color: var(--transcript-font-color-muted, var(--text-muted));
+  color: var(--text-muted);
   font-weight: 400;
   font-style: italic;
-  text-shadow: var(--transcript-text-shadow, none);
 }
 
 /* Speaker label */
@@ -670,15 +871,13 @@ body {
 .dual-view .transcript-flow {
   display: flex;
   gap: 0;
-  width: 100%;
   height: 100%;
   min-height: 0;
 }
 
 .dual-view .panel-source,
 .dual-view .panel-translation {
-  flex: 1 1 50%;
-  min-width: 0;
+  flex: 1;
   overflow-y: auto;
   padding: 0 12px;
   min-height: 0;
@@ -701,19 +900,17 @@ body {
 
 .dual-view .panel-source .seg-text {
   color: var(--text-secondary);
-  font-size: 1em;
+  font-size: 14px;
   margin-bottom: 6px;
   line-height: 1.5;
-  text-shadow: var(--transcript-text-shadow, none);
 }
 
 .dual-view .panel-translation .seg-text {
   color: var(--transcript-font-color, var(--text-primary));
   font-weight: 450;
-  font-size: 1em;
+  font-size: 14px;
   margin-bottom: 6px;
   line-height: 1.5;
-  text-shadow: var(--transcript-text-shadow, none);
 }
 
 .dual-view .panel-source .seg-text.pending {
@@ -724,24 +921,48 @@ body {
 .dual-view .seg-block {
   display: none;
 }
+```
 
+- [ ] **Step 2: Verify transcript text hiển thị đúng light theme colors**
+
+Run: Mở app, bắt đầu dịch
+Expected: Text dịch = `#111827`, text gốc = `#b0b5c0`, provisional = `#9ca3af` italic
+
+- [ ] **Step 3: Commit**
+
+```bash
+git add src/styles/main.css
+git commit -m "style(ui): add transcript, dual view, and text segment styles for light theme"
+```
+
+---
+
+### Task 6: CSS Floating Controls (font, color, view mode)
+
+**Files:**
+- Modify: `src/styles/main.css` (append)
+
+- [ ] **Step 1: Thêm CSS cho floating controls bottom-right**
+
+Append vào `main.css`:
+
+```css
 /* ══════════════ FLOATING CONTROLS (bottom-right) ══════════════ */
 
 .floating-controls {
   position: absolute;
   bottom: 24px;
-  right: 16px;
+  right: 8px;
   display: flex;
   align-items: center;
   gap: 6px;
   z-index: 10;
   opacity: 0;
-  transition: opacity 0.3s ease 1.5s;
+  transition: opacity 0.2s;
 }
 
-#overlay-view:hover .floating-controls {
+#overlay-view.is-recording:hover .floating-controls {
   opacity: 1;
-  transition: opacity 0.15s ease;
 }
 
 .font-controls {
@@ -789,148 +1010,33 @@ body {
 }
 
 .color-controls {
-  position: relative;
-}
-
-.color-trigger {
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-  border: 2px solid transparent;
-  cursor: pointer;
-  padding: 0;
-  outline: none;
-  background: var(--transcript-font-color, var(--text-primary));
-  box-shadow: var(--shadow-overlay);
-  transition: all 0.15s;
-}
-
-.color-trigger:hover {
-  transform: scale(1.15);
-}
-
-.color-palette {
-  position: absolute;
-  bottom: calc(100% + 6px);
-  right: -4px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
   background: var(--bg-toolbar);
-  border-radius: var(--radius-md);
-  padding: 8px;
-  box-shadow: var(--shadow-toolbar);
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 6px;
-  z-index: 20;
+  border-radius: var(--radius-sm);
+  padding: 4px 6px;
+  box-shadow: var(--shadow-overlay);
 }
 
-.color-palette.hidden {
-  display: none;
-}
-
-.color-palette .color-dot {
-  width: 20px;
-  height: 20px;
+.color-dot {
+  width: 16px;
+  height: 16px;
   border-radius: 50%;
   border: 2px solid transparent;
   cursor: pointer;
+  transition: all 0.15s;
   padding: 0;
   outline: none;
-  transition: all 0.15s;
 }
 
-.color-palette .color-dot:hover {
+.color-dot:hover {
   transform: scale(1.2);
 }
 
-.color-palette .color-dot.active {
+.color-dot.active {
   border-color: var(--accent-border);
   box-shadow: 0 0 0 2px var(--accent-light);
-}
-
-/* Opacity control */
-.opacity-control {
-  position: relative;
-}
-
-.opacity-trigger {
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-  border: 2px solid transparent;
-  cursor: pointer;
-  padding: 0;
-  outline: none;
-  background: transparent;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--text-secondary);
-  box-shadow: var(--shadow-overlay);
-  transition: all 0.15s;
-}
-
-.opacity-trigger:hover {
-  transform: scale(1.15);
-  color: var(--text-primary);
-  background: var(--bg-hover);
-}
-
-.opacity-popover {
-  position: absolute;
-  bottom: calc(100% + 8px);
-  right: -8px;
-  transform: none;
-  background: var(--bg-toolbar);
-  border-radius: var(--radius-md);
-  padding: 8px 12px;
-  box-shadow: var(--shadow-toolbar);
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  z-index: 20;
-  white-space: nowrap;
-}
-
-.opacity-popover::after {
-  content: '';
-  position: absolute;
-  top: 100%;
-  right: 12px;
-  border: 5px solid transparent;
-  border-top-color: var(--bg-toolbar);
-}
-
-.opacity-popover.hidden {
-  display: none;
-}
-
-.opacity-popover input[type="range"] {
-  width: 100px;
-  height: 4px;
-  -webkit-appearance: none;
-  appearance: none;
-  background: var(--border-color);
-  border-radius: 2px;
-  outline: none;
-  cursor: pointer;
-}
-
-.opacity-popover input[type="range"]::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  background: var(--accent);
-  cursor: pointer;
-  border: none;
-}
-
-.opacity-label {
-  font-size: 10px;
-  color: var(--text-muted);
-  min-width: 26px;
-  text-align: right;
-  font-variant-numeric: tabular-nums;
 }
 
 /* Resize Handle */
@@ -956,7 +1062,27 @@ body {
 #resize-handle:hover::after {
   background: rgba(0, 0, 0, 0.15);
 }
+```
 
+- [ ] **Step 2: Commit**
+
+```bash
+git add src/styles/main.css
+git commit -m "style(ui): add floating controls and resize handle styles"
+```
+
+---
+
+### Task 7: CSS Compact Mode
+
+**Files:**
+- Modify: `src/styles/main.css` (append)
+
+- [ ] **Step 1: Thêm compact mode CSS**
+
+Append vào `main.css`:
+
+```css
 /* ══════════════ COMPACT MODE ══════════════ */
 
 #drag-region.compact-hidden {
@@ -993,7 +1119,29 @@ body {
 .compact-mode #transcript-container {
   padding-top: 4px;
 }
+```
 
+- [ ] **Step 2: Commit**
+
+```bash
+git add src/styles/main.css
+git commit -m "style(ui): add compact mode styles for light theme"
+```
+
+---
+
+### Task 8: CSS Settings View
+
+**Files:**
+- Modify: `src/styles/main.css` (append)
+
+Settings HTML structure giữ nguyên, chỉ reskin CSS sang light theme.
+
+- [ ] **Step 1: Thêm toàn bộ CSS cho settings view**
+
+Append vào `main.css`:
+
+```css
 /* ══════════════ SETTINGS VIEW ══════════════ */
 
 #settings-view {
@@ -1562,7 +1710,32 @@ input[type="range"]::-webkit-slider-thumb {
   background: var(--bg-hover);
   color: var(--text-primary);
 }
+```
 
+- [ ] **Step 2: Verify settings view**
+
+Run: Mở app, click Settings
+Expected: Nền trắng, tabs hoạt động, form elements styled đúng (input nền #f9fafb, border #e5e7eb, accent indigo)
+
+- [ ] **Step 3: Commit**
+
+```bash
+git add src/styles/main.css
+git commit -m "style(ui): add settings view styles for light theme"
+```
+
+---
+
+### Task 9: CSS Sessions View + About Tab
+
+**Files:**
+- Modify: `src/styles/main.css` (append)
+
+- [ ] **Step 1: Thêm CSS cho sessions view và about tab**
+
+Append vào `main.css`:
+
+```css
 /* ══════════════ SESSIONS VIEW ══════════════ */
 
 #sessions-view {
@@ -1697,57 +1870,6 @@ input[type="range"]::-webkit-slider-thumb {
   border-radius: 2px;
 }
 
-/* Session content: metadata */
-.session-meta {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  padding-bottom: 12px;
-  margin-bottom: 12px;
-  border-bottom: 1px solid var(--border-light);
-}
-
-.session-meta-chip {
-  font-size: 11px;
-  color: var(--text-secondary);
-  background: var(--bg-hover);
-  border-radius: var(--radius-sm);
-  padding: 2px 8px;
-}
-
-/* Session content: transcript */
-.session-segments {
-  display: flex;
-  flex-direction: column;
-}
-
-.session-speaker {
-  color: var(--accent);
-  font-weight: 600;
-  font-size: 12px;
-  margin-top: 14px;
-  margin-bottom: 2px;
-}
-
-.session-speaker:first-child {
-  margin-top: 0;
-}
-
-.session-original {
-  color: var(--text-secondary);
-  font-size: 13px;
-  font-style: italic;
-  padding-left: 8px;
-  border-left: 2px solid var(--border-light);
-  margin: 2px 0;
-}
-
-.session-translation {
-  color: var(--text-primary);
-  font-size: 13px;
-  margin: 2px 0 8px 0;
-}
-
 /* About tab */
 .about-info {
   text-align: center;
@@ -1856,7 +1978,27 @@ input[type="range"]::-webkit-slider-thumb {
   min-width: 32px;
   text-align: right;
 }
+```
 
+- [ ] **Step 2: Commit**
+
+```bash
+git add src/styles/main.css
+git commit -m "style(ui): add sessions view, about tab, and update progress styles"
+```
+
+---
+
+### Task 10: CSS Modal + Toast + Misc
+
+**Files:**
+- Modify: `src/styles/main.css` (append)
+
+- [ ] **Step 1: Thêm CSS cho modal, toast, và misc styles**
+
+Append vào `main.css`:
+
+```css
 /* ══════════════ MODAL ══════════════ */
 
 .modal-overlay {
@@ -2043,3 +2185,163 @@ input[type="range"]::-webkit-slider-thumb {
   color: var(--text-muted);
   font-size: 13px;
 }
+```
+
+- [ ] **Step 2: Commit**
+
+```bash
+git add src/styles/main.css
+git commit -m "style(ui): add modal, toast, and misc compatibility styles"
+```
+
+---
+
+### Task 11: JS Updates — ui.js inline styles + app.js idle button
+
+**Files:**
+- Modify: `src/js/ui.js:199-209` (showStatusMessage inline color)
+- Modify: `src/js/app.js` (wire `#btn-idle-start` + update source-btn class references)
+
+- [ ] **Step 1: Fix inline style trong ui.js showStatusMessage**
+
+Trong `src/js/ui.js`, line 206, thay đổi inline style color:
+
+Tìm:
+```javascript
+statusEl.style.cssText = 'text-align:center; padding:8px; color:rgba(255,255,255,0.5); font-size:13px;';
+```
+
+Thay bằng:
+```javascript
+statusEl.style.cssText = 'text-align:center; padding:8px; color:var(--text-muted); font-size:13px;';
+```
+
+- [ ] **Step 2: Wire `#btn-idle-start` trong app.js**
+
+Trong `src/js/app.js`, tìm đoạn bind event cho `#btn-start` (trong method `_bindEvents`), thêm ngay sau đó:
+
+```javascript
+const btnIdleStart = document.getElementById('btn-idle-start');
+if (btnIdleStart) {
+    btnIdleStart.addEventListener('click', () => this._toggleRecording());
+}
+```
+
+Và thêm logic ẩn/hiện idle overlay + toggle toolbar visibility khi bắt đầu/dừng recording. Tìm trong method nơi `isRunning` thay đổi, thêm:
+
+```javascript
+const idleOverlay = document.getElementById('idle-overlay');
+const overlayView = document.getElementById('overlay-view');
+if (idleOverlay) {
+    idleOverlay.classList.toggle('hidden', this.isRunning);
+}
+if (overlayView) {
+    overlayView.classList.toggle('is-recording', this.isRunning);
+}
+```
+
+**Quan trọng:** Floating toolbar chỉ hiện khi hover + đang recording. Thêm CSS rule cho điều này:
+
+Trong `main.css`, thay rule hiện toolbar:
+```css
+/* Toolbar chỉ hiện khi recording + hover */
+#overlay-view.is-recording:hover .floating-toolbar {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateX(-50%) translateY(0);
+}
+```
+
+Và bỏ rule cũ `#overlay-view:hover .floating-toolbar` (thay bằng rule trên). Tương tự cho status label:
+```css
+#overlay-view.is-recording:hover .status-label {
+  opacity: 1;
+}
+```
+
+- [ ] **Step 3: Update source button class references trong app.js**
+
+`app.js` dùng `querySelector('.source-btn.active')` hoặc class toggle `active` trên source buttons. Vì HTML đổi class từ `source-btn` sang `toolbar-btn` nhưng parent `.source-controls` vẫn giữ, kiểm tra `app.js` xem có reference class `source-btn`:
+
+Tìm trong `app.js` mọi chỗ reference `source-btn`:
+- Nếu dùng `classList.add/remove/toggle('active')` qua ID: OK, không cần đổi
+- Nếu dùng `querySelectorAll('.source-btn')`: cần đổi thành `querySelectorAll('.source-controls .toolbar-btn')` hoặc giữ class `source-btn` trên buttons
+
+**Giải pháp an toàn hơn:** Giữ thêm class `source-btn` trên 3 source buttons trong HTML bên cạnh `toolbar-btn`. Sửa HTML:
+
+```html
+<button id="btn-source-system" class="toolbar-btn source-btn active" ...>
+<button id="btn-source-mic" class="toolbar-btn source-btn" ...>
+<button id="btn-source-both" class="toolbar-btn source-btn" ...>
+```
+
+- [ ] **Step 4: Verify functional — Start/Stop, source switch, TTS toggle, Settings, Sessions**
+
+Run: Mở app, test:
+1. Click "Bắt đầu" trên idle overlay → recording bắt đầu, idle overlay ẩn
+2. Hover → floating toolbar hiện
+3. Switch source buttons
+4. TTS toggle
+5. Open Settings/Sessions và quay lại
+6. Stop recording → idle overlay hiện lại
+
+Expected: Tất cả hoạt động, không console errors
+
+- [ ] **Step 5: Commit**
+
+```bash
+git add src/js/ui.js src/js/app.js src/index.html
+git commit -m "fix(ui): wire idle overlay, fix inline styles, keep source-btn class compat"
+```
+
+---
+
+### Task 12: Visual Polish + Verification
+
+**Files:**
+- Có thể modify: `src/styles/main.css`, `src/index.html`
+
+- [ ] **Step 1: So sánh visual với mockups**
+
+Mở mockups tại `.superpowers/brainstorm/` và so sánh:
+- `overlay-v6.html`: Toolbar + content layout
+- `settings-design.html`: Settings tabs
+- `sessions-design.html`: Sessions list + viewer
+
+Ghi chú mọi khác biệt cần fix.
+
+- [ ] **Step 2: Fix spacing, colors, sizes nếu lệch mockup**
+
+Ví dụ có thể cần:
+- Adjust toolbar button spacing
+- Tweak font sizes
+- Fix border-radius inconsistencies
+- Adjust shadow values
+
+- [ ] **Step 3: Test responsive — resize window nhỏ/lớn**
+
+Kéo resize handle, đảm bảo:
+- Toolbar không bị tràn
+- Transcript content scroll đúng
+- Floating controls không che content
+
+- [ ] **Step 4: Test compact mode**
+
+Toggle compact mode (⌘D):
+- Drag handle ẩn
+- Status dot ẩn
+- Hover top 6px hiện drag region
+
+- [ ] **Step 5: Test dual view**
+
+Toggle dual view:
+- 2 cột bằng nhau
+- Separator dọc #f0f1f3
+- Scroll independent mỗi cột
+
+- [ ] **Step 6: Final commit**
+
+```bash
+git add -A
+git commit -m "style(ui): final polish and visual alignment for light theme redesign"
+```

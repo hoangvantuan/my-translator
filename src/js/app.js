@@ -152,7 +152,8 @@ class App {
 
         // Copy session content
         document.getElementById('btn-session-copy').addEventListener('click', async () => {
-            const content = document.getElementById('session-viewer-content')?.textContent || '';
+            const el = document.getElementById('session-viewer-content');
+            const content = el?.dataset.rawText || el?.textContent || '';
             if (content) {
                 await navigator.clipboard.writeText(content);
                 this._showToast('Copied to clipboard', 'success');
@@ -1889,18 +1890,96 @@ class App {
 
         try {
             const text = await invoke('read_transcript', { filename });
-            if (content) content.textContent = text;
+            if (content) {
+                content.innerHTML = this._renderSessionContent(text);
+                content.dataset.rawText = text;
+            }
         } catch (err) {
             if (content) content.textContent = `Error loading session: ${err}`;
         }
     }
 
+    _renderSessionContent(raw) {
+        let body = raw;
+        let metaHtml = '';
+
+        if (raw.startsWith('---')) {
+            const endIdx = raw.indexOf('---', 3);
+            if (endIdx !== -1) {
+                const yaml = raw.slice(3, endIdx).trim();
+                body = raw.slice(endIdx + 3).trim();
+
+                const meta = {};
+                for (const line of yaml.split('\n')) {
+                    const colonIdx = line.indexOf(':');
+                    if (colonIdx === -1) continue;
+                    const key = line.slice(0, colonIdx).trim();
+                    const val = line.slice(colonIdx + 1).trim();
+                    if (val) meta[key] = val;
+                }
+
+                const chips = [];
+                if (meta.duration) chips.push(meta.duration);
+                if (meta.source_lang && meta.target_lang) {
+                    chips.push(`${meta.source_lang} → ${meta.target_lang}`);
+                }
+                if (meta.mode) {
+                    const modeLabel = meta.mode === 'one_way' ? 'One-way' : 'Two-way';
+                    chips.push(modeLabel);
+                }
+                if (meta.audio_source) chips.push(meta.audio_source);
+                if (meta.model) chips.push(meta.model);
+                if (meta.segments) chips.push(`${meta.segments} segments`);
+
+                if (chips.length) {
+                    metaHtml = `<div class="session-meta">${chips.map(c =>
+                        `<span class="session-meta-chip">${this._esc(c)}</span>`
+                    ).join('')}</div>`;
+                }
+            }
+        }
+
+        const lines = body.split('\n');
+        const parts = [];
+        let i = 0;
+
+        while (i < lines.length) {
+            const line = lines[i];
+
+            const speakerMatch = line.match(/^\*\*(.+?):\*\*$/);
+            if (speakerMatch) {
+                parts.push(`<div class="session-speaker">${this._esc(speakerMatch[1])}</div>`);
+                i++;
+                continue;
+            }
+
+            if (line.startsWith('> ')) {
+                parts.push(`<div class="session-original">${this._esc(line.slice(2))}</div>`);
+                i++;
+                continue;
+            }
+
+            if (line.trim() === '') {
+                i++;
+                continue;
+            }
+
+            parts.push(`<div class="session-translation">${this._esc(line)}</div>`);
+            i++;
+        }
+
+        return metaHtml + '<div class="session-segments">' + parts.join('') + '</div>';
+    }
+
     _parseSessionMeta(session) {
-        // created_at format: "2026-03-27 10:21:05"
         const parts = (session.created_at || '').split(' ');
         const date = parts[0] || '';
         const time = parts[1] ? parts[1].slice(0, 5) : '';
-        return { date, time, duration: '', langPair: '' };
+        const duration = session.duration || '';
+        const langPair = (session.source_lang && session.target_lang)
+            ? `${session.source_lang} → ${session.target_lang}`
+            : '';
+        return { date, time, duration, langPair };
     }
 
     _formatBytes(bytes) {
