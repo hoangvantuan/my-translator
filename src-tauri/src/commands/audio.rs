@@ -164,3 +164,16 @@ pub fn check_permissions() -> PermissionStatus {
         microphone: "unknown".to_string(),
     }
 }
+
+/// Open macOS Privacy & Security > Screen Recording settings
+#[tauri::command]
+pub fn open_privacy_settings() -> Result<(), String> {
+    #[cfg(target_os = "macos")]
+    {
+        std::process::Command::new("open")
+            .arg("x-apple.systempreferences:com.apple.preference.security?Privacy_ScreenCapture")
+            .spawn()
+            .map_err(|e| format!("Failed to open System Settings: {}", e))?;
+    }
+    Ok(())
+}

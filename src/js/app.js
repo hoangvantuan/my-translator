@@ -1233,7 +1233,13 @@ class App {
             console.log('[App] Audio capture started successfully');
         } catch (err) {
             console.error('Failed to start audio capture:', err);
-            this._showToast(`Audio error: ${err}`, 'error');
+            const errStr = String(err);
+            if (errStr.includes('declined') || errStr.includes('Screen Recording permission')) {
+                this._showToast('Cần cấp quyền Screen Recording. Đang mở System Settings...', 'error');
+                invoke('open_privacy_settings').catch(() => {});
+            } else {
+                this._showToast(`Audio error: ${err}`, 'error');
+            }
             await this.stop();
         }
     }
@@ -1251,7 +1257,13 @@ class App {
             await invoke('stop_capture');
         } catch (err) {
             console.error('[App] Audio permission check failed:', err);
-            this._showToast(`Audio permission required: ${err}`, 'error');
+            const errStr = String(err);
+            if (errStr.includes('declined') || errStr.includes('Screen Recording permission')) {
+                this._showToast('Cần cấp quyền Screen Recording. Đang mở System Settings...', 'error');
+                invoke('open_privacy_settings').catch(() => {});
+            } else {
+                this._showToast(`Audio permission required: ${err}`, 'error');
+            }
             this.isRunning = false;
             this._updateStartButton();
             this._updateStatus('error');
@@ -1342,7 +1354,13 @@ class App {
             console.log('[App] Audio capture started');
         } catch (err) {
             console.error('Audio capture failed (pipeline still running):', err);
-            this._showToast(`Audio: ${err}. Pipeline still loading...`, 'error');
+            const errStr = String(err);
+            if (errStr.includes('declined') || errStr.includes('Screen Recording permission')) {
+                this._showToast('Cần cấp quyền Screen Recording. Đang mở System Settings...', 'error');
+                invoke('open_privacy_settings').catch(() => {});
+            } else {
+                this._showToast(`Audio: ${err}. Pipeline still loading...`, 'error');
+            }
         }
     }
 
