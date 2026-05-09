@@ -1,0 +1,139 @@
+<h2>Summary Panel Layout (v2)</h2>
+<p class="subtitle">Nút toggle nằm ở floating controls (bottom-right), cùng nhóm font size / color / opacity</p>
+
+<div class="split">
+  <div class="mockup">
+    <div class="mockup-header">Overlay View + Floating Controls</div>
+    <div class="mockup-body" style="min-height:420px;position:relative;background:#f8f9fa;">
+      <!-- Transcript area -->
+      <div style="padding:12px;font-size:13px;color:#374151;">
+        <div style="margin-bottom:8px;padding:8px;background:white;border-radius:8px;border-left:3px solid #4f46e5;">
+          <div style="color:#111827;font-weight:500;">Hello everyone, let's start the meeting...</div>
+          <div style="color:#6b7280;font-size:11px;margin-top:4px;">Xin chào mọi người, bắt đầu cuộc họp...</div>
+        </div>
+        <div style="margin-bottom:8px;padding:8px;background:white;border-radius:8px;border-left:3px solid #4f46e5;">
+          <div style="color:#111827;font-weight:500;">Today we need to discuss the Q2 roadmap...</div>
+          <div style="color:#6b7280;font-size:11px;margin-top:4px;">Hôm nay chúng ta cần thảo luận roadmap Q2...</div>
+        </div>
+      </div>
+
+      <!-- Floating toolbar (top) - unchanged -->
+      <div style="position:absolute;top:8px;left:50%;transform:translateX(-50%);background:white;border-radius:10px;padding:4px 12px;box-shadow:0 2px 8px rgba(0,0,0,0.1);font-size:11px;color:#6b7280;display:flex;gap:8px;align-items:center;">
+        <span>🎙 System</span> <span style="color:#e5e7eb;">|</span>
+        <span>🔊</span> <span>📖</span> <span style="color:#e5e7eb;">|</span>
+        <span>📋</span> <span>📂</span> <span>⚙️</span> <span style="color:#e5e7eb;">|</span>
+        <span style="color:#10b981;">▶ Start</span>
+      </div>
+
+      <!-- Floating controls (bottom-right) -->
+      <div style="position:absolute;bottom:24px;right:16px;display:flex;flex-direction:column;gap:8px;align-items:flex-end;">
+        <!-- Summary toggle button - NEW -->
+        <div style="display:flex;align-items:center;gap:6px;">
+          <span style="font-size:9px;color:#4f46e5;font-weight:600;">← MỚI</span>
+          <div style="background:white;border-radius:8px;padding:6px 10px;box-shadow:0 2px 8px rgba(0,0,0,0.12);cursor:pointer;display:flex;align-items:center;gap:4px;border:2px solid #4f46e5;">
+            <span style="font-size:14px;">📝</span>
+            <span style="font-size:10px;color:#4f46e5;font-weight:500;">●</span>
+          </div>
+        </div>
+
+        <!-- Existing controls -->
+        <div style="background:white;border-radius:8px;padding:4px 10px;box-shadow:0 2px 8px rgba(0,0,0,0.1);display:flex;gap:6px;align-items:center;font-size:12px;color:#6b7280;">
+          <span style="cursor:pointer;">A-</span>
+          <span style="font-weight:600;color:#111827;">16</span>
+          <span style="cursor:pointer;">A+</span>
+          <span style="color:#e5e7eb;">|</span>
+          <span style="width:16px;height:16px;background:#111827;border-radius:50%;display:inline-block;"></span>
+          <span style="color:#e5e7eb;">|</span>
+          <span>◐</span>
+          <span style="color:#e5e7eb;">|</span>
+          <span>⊞</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="mockup">
+    <div class="mockup-header">Summary Panel (slide-in từ phải)</div>
+    <div class="mockup-body" style="min-height:420px;background:#ffffff;border-left:2px solid #e5e7eb;display:flex;flex-direction:column;">
+      <!-- Header -->
+      <div style="padding:12px 16px;border-bottom:1px solid #e5e7eb;display:flex;justify-content:space-between;align-items:center;">
+        <div>
+          <div style="font-weight:600;font-size:14px;color:#111827;">📝 Auto Summary</div>
+          <div style="font-size:11px;color:#6b7280;">Template: Ghi chú cuộc họp</div>
+        </div>
+        <div style="display:flex;gap:6px;">
+          <button style="background:#f3f4f6;border:none;border-radius:6px;padding:4px 8px;font-size:11px;cursor:pointer;" title="Chỉnh sửa">✏️</button>
+          <button style="background:#f3f4f6;border:none;border-radius:6px;padding:4px 8px;font-size:11px;cursor:pointer;" title="Copy">📋</button>
+          <button style="background:#f3f4f6;border:none;border-radius:6px;padding:4px 8px;font-size:11px;cursor:pointer;" title="Đóng">✕</button>
+        </div>
+      </div>
+
+      <!-- Template selector -->
+      <div style="padding:8px 16px;border-bottom:1px solid #f3f4f6;">
+        <select style="width:100%;padding:6px 8px;border:1px solid #d1d5db;border-radius:6px;font-size:12px;background:white;">
+          <option>📋 Ghi chú cuộc họp</option>
+          <option>📚 Học ngoại ngữ</option>
+          <option>📊 Phân tích nội dung</option>
+          <option>+ Tạo template mới...</option>
+        </select>
+      </div>
+
+      <!-- Status bar -->
+      <div style="padding:6px 16px;background:#f0fdf4;border-bottom:1px solid #e5e7eb;display:flex;justify-content:space-between;font-size:11px;">
+        <span style="color:#15803d;">● Đang chạy</span>
+        <span style="color:#6b7280;">Interval: 5 phút | Lần tiếp: 2:34</span>
+      </div>
+
+      <!-- Summary content -->
+      <div style="flex:1;padding:16px;overflow-y:auto;">
+        <div style="font-size:12px;color:#374151;line-height:1.7;">
+          <div style="font-weight:600;color:#111827;margin-bottom:8px;">📌 Tóm tắt cuộc họp</div>
+          <div style="margin-bottom:12px;">
+            <strong>Chủ đề:</strong> Thảo luận roadmap Q2 2026
+          </div>
+          <div style="margin-bottom:12px;">
+            <strong>Key Points:</strong>
+            <ul style="margin:4px 0;padding-left:20px;">
+              <li>Ưu tiên tính năng auto-summary cho translator</li>
+              <li>Cần tích hợp LiteLLM để hỗ trợ đa provider</li>
+              <li>Timeline: hoàn thành trong sprint này</li>
+            </ul>
+          </div>
+          <div style="margin-bottom:12px;">
+            <strong>Action Items:</strong>
+            <ul style="margin:4px 0;padding-left:20px;">
+              <li>@Tuấn: Design summary panel UI</li>
+              <li>@Team: Review LiteLLM integration approach</li>
+            </ul>
+          </div>
+          <div style="font-size:10px;color:#9ca3af;margin-top:16px;">
+            Cập nhật lúc 14:30 | Lần summary thứ 3
+          </div>
+        </div>
+      </div>
+
+      <!-- Bottom actions -->
+      <div style="padding:8px 16px;border-top:1px solid #e5e7eb;display:flex;gap:6px;">
+        <button style="flex:1;background:#4f46e5;color:white;border:none;border-radius:6px;padding:6px;font-size:12px;cursor:pointer;">Tóm tắt ngay</button>
+        <button style="background:#f3f4f6;border:1px solid #d1d5db;border-radius:6px;padding:6px 12px;font-size:12px;cursor:pointer;">⏸ Tạm dừng</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section" style="margin-top:24px;">
+  <h3>Floating Controls Layout</h3>
+  <p class="subtitle">Nút summary nằm phía trên nhóm font/color/opacity hiện tại</p>
+  <div style="display:inline-block;background:#f8f9fa;border-radius:12px;padding:16px 24px;">
+    <div style="font-size:12px;color:#374151;line-height:2.2;">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
+        <span style="background:white;border:2px solid #4f46e5;border-radius:6px;padding:2px 8px;font-size:13px;">📝</span>
+        <span style="color:#6b7280;font-size:11px;">← Summary toggle (có badge ● khi đang chạy)</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;">
+        <span style="background:white;border:1px solid #e5e7eb;border-radius:6px;padding:2px 8px;font-size:11px;">A- 16 A+ | 🎨 | ◐ | ⊞</span>
+        <span style="color:#6b7280;font-size:11px;">← Controls hiện tại</span>
+      </div>
+    </div>
+  </div>
+</div>

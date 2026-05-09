@@ -1,0 +1,167 @@
+<h2>Design chi tiết: Unified Control Bar</h2>
+<p class="subtitle">Single row, bottom-right, hover to show. 2 popover groups + 7 direct buttons.</p>
+
+<!-- Section 1: Bar layout -->
+<div class="section">
+  <h3>1. Control Bar (bottom-right, show on hover)</h3>
+  <div class="mockup">
+    <div class="mockup-header">Overlay window mockup</div>
+    <div class="mockup-body" style="padding: 0; height: 320px; position: relative; background: linear-gradient(180deg, rgba(255,255,255,0.85) 0%, rgba(255,255,255,0.9) 100%);">
+      <!-- Fake transcript content -->
+      <div style="padding: 16px 20px; font-size: 13px; color: #333; line-height: 1.8;">
+        <p style="margin: 0 0 8px;">Xin chào, hôm nay chúng ta sẽ thảo luận về kiến trúc microservices và cách triển khai trong production environment...</p>
+        <p style="margin: 0 0 8px; color: rgba(17,24,39,0.55); font-size: 12px;">Hello, today we will discuss microservices architecture and how to deploy in production environment...</p>
+        <p style="margin: 0 0 8px;">Đầu tiên, hãy xem xét các thành phần cốt lõi của hệ thống...</p>
+        <p style="margin: 0; color: rgba(17,24,39,0.55); font-size: 12px;">First, let's look at the core components of the system...</p>
+      </div>
+      <!-- Control bar -->
+      <div style="position: absolute; bottom: 16px; right: 12px; display: flex; gap: 5px; align-items: center; background: rgba(255,255,255,0.95); padding: 5px 8px; border-radius: 12px; box-shadow: 0 2px 12px rgba(0,0,0,0.12); backdrop-filter: blur(8px);">
+        <span style="padding: 3px 7px; background: rgba(59,130,246,0.1); border: 1px solid rgba(59,130,246,0.2); border-radius: 6px; font-size: 11px; cursor: pointer;">🔊 ▾</span>
+        <span style="padding: 3px 7px; font-size: 11px; opacity: 0.5; cursor: pointer;">💬</span>
+        <span style="padding: 3px 7px; font-size: 11px; cursor: pointer;">📑</span>
+        <span style="padding: 3px 7px; border: 1px solid rgba(0,0,0,0.08); border-radius: 6px; font-size: 11px; cursor: pointer;">Aa ▾</span>
+        <span style="padding: 3px 7px; font-size: 11px; cursor: pointer;">📋</span>
+        <span style="padding: 3px 7px; font-size: 11px; cursor: pointer;">🕐</span>
+        <span style="padding: 3px 7px; font-size: 11px; cursor: pointer;">⚙</span>
+        <span style="padding: 3px 7px; background: #ef4444; color: white; border-radius: 6px; font-size: 11px; cursor: pointer;">⏹</span>
+        <span style="padding: 3px 7px; background: rgba(59,130,246,0.1); border: 1px solid rgba(59,130,246,0.2); color: #3b82f6; border-radius: 6px; font-size: 11px; cursor: pointer;">📌</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Section 2: Source popover -->
+<div class="section">
+  <h3>2. Source Popover (click 🔊▾)</h3>
+  <div class="split">
+    <div class="mockup">
+      <div class="mockup-header">Popover mở phía trên icon</div>
+      <div class="mockup-body" style="padding: 20px; display: flex; flex-direction: column; align-items: flex-start; gap: 12px;">
+        <!-- Popover -->
+        <div style="background: rgba(255,255,255,0.98); padding: 6px; border-radius: 10px; box-shadow: 0 4px 16px rgba(0,0,0,0.12); border: 1px solid rgba(0,0,0,0.06);">
+          <div style="display: flex; gap: 3px;">
+            <span style="padding: 5px 10px; background: #3b82f6; color: white; border-radius: 8px; font-size: 11px; cursor: pointer;">🔊 System</span>
+            <span style="padding: 5px 10px; border-radius: 8px; font-size: 11px; cursor: pointer;">🎤 Mic</span>
+            <span style="padding: 5px 10px; border-radius: 8px; font-size: 11px; cursor: pointer;">🔊+🎤 Both</span>
+          </div>
+        </div>
+        <!-- Arrow indicator -->
+        <div style="margin-left: 24px; width: 0; height: 0; border-left: 6px solid transparent; border-right: 6px solid transparent; border-top: 6px solid rgba(0,0,0,0.06);"></div>
+        <!-- Trigger button -->
+        <div style="padding: 3px 7px; background: rgba(59,130,246,0.1); border: 1px solid rgba(59,130,246,0.2); border-radius: 6px; font-size: 11px;">🔊 ▾</div>
+      </div>
+    </div>
+    <div style="padding: 16px;">
+      <h4 style="margin: 0 0 8px;">Behavior</h4>
+      <ul style="margin: 0; padding-left: 18px; font-size: 13px; line-height: 1.8;">
+        <li>Click trigger → popover toggle</li>
+        <li>Click source option → set active, close popover</li>
+        <li>Active source highlighted (blue bg)</li>
+        <li>Trigger icon thay đổi theo source đang chọn</li>
+        <li>Click outside → close popover</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- Section 3: Text Appearance popover -->
+<div class="section">
+  <h3>3. Text Appearance Popover (click Aa▾)</h3>
+  <div class="split">
+    <div class="mockup">
+      <div class="mockup-header">Popover mở phía trên icon</div>
+      <div class="mockup-body" style="padding: 20px; display: flex; flex-direction: column; align-items: flex-start; gap: 12px;">
+        <!-- Popover -->
+        <div style="background: rgba(255,255,255,0.98); padding: 10px 12px; border-radius: 10px; box-shadow: 0 4px 16px rgba(0,0,0,0.12); border: 1px solid rgba(0,0,0,0.06);">
+          <!-- Font size row -->
+          <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 10px;">
+            <span style="font-size: 11px; color: #888; width: 50px;">Font</span>
+            <div style="display: flex; gap: 2px; align-items: center; background: rgba(0,0,0,0.04); padding: 3px 6px; border-radius: 8px;">
+              <span style="padding: 2px 6px; font-size: 12px; cursor: pointer;">A−</span>
+              <span style="padding: 2px 6px; font-size: 11px; color: #888; min-width: 20px; text-align: center;">16</span>
+              <span style="padding: 2px 6px; font-size: 12px; cursor: pointer;">A+</span>
+            </div>
+          </div>
+          <!-- Color row -->
+          <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 10px;">
+            <span style="font-size: 11px; color: #888; width: 50px;">Color</span>
+            <div style="display: flex; gap: 4px;">
+              <div style="width: 18px; height: 18px; border-radius: 50%; background: #111827; border: 2px solid #3b82f6; cursor: pointer;"></div>
+              <div style="width: 18px; height: 18px; border-radius: 50%; background: #92400e; cursor: pointer;"></div>
+              <div style="width: 18px; height: 18px; border-radius: 50%; background: #164e63; cursor: pointer;"></div>
+              <div style="width: 18px; height: 18px; border-radius: 50%; background: #14532d; cursor: pointer;"></div>
+              <div style="width: 18px; height: 18px; border-radius: 50%; background: #7f1d1d; cursor: pointer;"></div>
+              <div style="width: 18px; height: 18px; border-radius: 50%; background: #e5e7eb; cursor: pointer;"></div>
+            </div>
+          </div>
+          <!-- Opacity row -->
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <span style="font-size: 11px; color: #888; width: 50px;">Opacity</span>
+            <div style="display: flex; align-items: center; gap: 6px; flex: 1;">
+              <div style="flex: 1; height: 4px; background: linear-gradient(to right, #ddd, #3b82f6 85%, #ddd 85%); border-radius: 2px; min-width: 80px;"></div>
+              <span style="font-size: 11px; color: #888;">85%</span>
+            </div>
+          </div>
+        </div>
+        <!-- Arrow -->
+        <div style="margin-left: 30px; width: 0; height: 0; border-left: 6px solid transparent; border-right: 6px solid transparent; border-top: 6px solid rgba(0,0,0,0.06);"></div>
+        <!-- Trigger -->
+        <div style="padding: 3px 7px; border: 1px solid rgba(0,0,0,0.08); border-radius: 6px; font-size: 11px;">Aa ▾</div>
+      </div>
+    </div>
+    <div style="padding: 16px;">
+      <h4 style="margin: 0 0 8px;">Behavior</h4>
+      <ul style="margin: 0; padding-left: 18px; font-size: 13px; line-height: 1.8;">
+        <li>Gộp 3 controls hiện tại vào 1 popover</li>
+        <li>Font size: A−/A+ thay đổi realtime</li>
+        <li>Color: click dot → apply ngay, active dot có border</li>
+        <li>Opacity: drag slider → preview realtime, debounce save</li>
+        <li>Popover đóng khi click outside</li>
+        <li>Mutual exclusive: mở Aa → đóng Source, và ngược lại</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- Section 4: Visibility & Position -->
+<div class="section">
+  <h3>4. Visibility & Position</h3>
+  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+    <div style="background: #f8fafc; padding: 14px; border-radius: 10px;">
+      <h4 style="margin: 0 0 8px; font-size: 13px;">Position</h4>
+      <ul style="margin: 0; padding-left: 16px; font-size: 12px; line-height: 1.8;">
+        <li>Bottom-right của overlay window</li>
+        <li>Giữ vị trí <code>bottom: 24px; right: 16px</code></li>
+        <li>Popover mở phía trên bar</li>
+      </ul>
+    </div>
+    <div style="background: #f8fafc; padding: 14px; border-radius: 10px;">
+      <h4 style="margin: 0 0 8px; font-size: 13px;">Hover behavior</h4>
+      <ul style="margin: 0; padding-left: 16px; font-size: 12px; line-height: 1.8;">
+        <li>Ẩn mặc định (opacity: 0)</li>
+        <li>Show khi hover overlay (giữ delay 1.5s)</li>
+        <li>Popover đang mở → bar không ẩn</li>
+      </ul>
+    </div>
+    <div style="background: #fef3c7; padding: 14px; border-radius: 10px;">
+      <h4 style="margin: 0 0 8px; font-size: 13px;">Xoá bỏ</h4>
+      <ul style="margin: 0; padding-left: 16px; font-size: 12px; line-height: 1.8;">
+        <li>Xoá hoàn toàn <code>#floating-toolbar</code> (HTML + CSS + JS)</li>
+        <li>Xoá <code>#btn-view-mode</code> duplicate</li>
+        <li>Xoá CSS <code>.floating-toolbar</code></li>
+      </ul>
+    </div>
+    <div style="background: #f0fdf4; padding: 14px; border-radius: 10px;">
+      <h4 style="margin: 0 0 8px; font-size: 13px;">Giữ lại</h4>
+      <ul style="margin: 0; padding-left: 16px; font-size: 12px; line-height: 1.8;">
+        <li>Keyboard shortcuts (⌘1/2/3, ⌘T, Space)</li>
+        <li>Button IDs cho app.js handlers</li>
+        <li>Settings sync, debounce logic</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<div style="margin-top: 20px; padding: 14px; background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 12px;">
+  <p style="margin: 0; font-size: 13px;"><strong>Design này ổn không?</strong> Nếu cần điều chỉnh gì (thứ tự nút, kích thước popover, vị trí bar...), cho mình biết.</p>
+</div>

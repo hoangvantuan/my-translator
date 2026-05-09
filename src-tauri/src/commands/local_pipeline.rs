@@ -33,10 +33,11 @@ fn chrono_now() -> String {
 pub fn start_local_pipeline(
     source_lang: String,
     target_lang: String,
+    transcript_only: bool,
     channel: Channel<String>,
     state: tauri::State<'_, LocalPipelineState>,
 ) -> Result<(), String> {
-    log_to_file(&format!("start_local_pipeline called: src={}, tgt={}", source_lang, target_lang));
+    log_to_file(&format!("start_local_pipeline called: src={}, tgt={}, transcript_only={}", source_lang, target_lang, transcript_only));
 
     // Send status to frontend
     let _ = channel.send(r#"{"type":"status","message":"Stopping old pipeline..."}"#.to_string());
@@ -95,14 +96,20 @@ pub fn start_local_pipeline(
 
     let path_env = "/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin";
 
-    let mut child = Command::new(&python)
-        .arg(&script_path)
+    let mut cmd = Command::new(&python);
+    cmd.arg(&script_path)
         .arg("--asr-model")
         .arg("whisper")
         .arg("--source-lang")
         .arg(&source_lang)
         .arg("--target-lang")
-        .arg(&target_lang)
+        .arg(&target_lang);
+
+    if transcript_only {
+        cmd.arg("--transcript-only");
+    }
+
+    let mut child = cmd
         .env("PATH", path_env)
         .env("HOME", &home)
         .env("TOKENIZERS_PARALLELISM", "false")

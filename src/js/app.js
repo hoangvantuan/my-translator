@@ -1007,6 +1007,12 @@ class App {
         return str.replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
     }
 
+    _esc(str) {
+        const d = document.createElement('div');
+        d.textContent = str;
+        return d.innerHTML;
+    }
+
     _updateTTSProviderUI(provider) {
         const ed = document.getElementById('tts-edge-settings');
         const go = document.getElementById('tts-google-settings');

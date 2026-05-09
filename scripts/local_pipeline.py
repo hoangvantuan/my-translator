@@ -52,11 +52,13 @@ class LocalPipeline:
         target_lang="vi",
         chunk_seconds=7,
         stride_seconds=5,
+        transcript_only=False,
     ):
         self.asr_model_type = asr_model  # "whisper" or "qwen"
         self.source_lang = source_lang
         self.target_lang = target_lang
         self.target_lang_name = LANG_NAMES.get(target_lang, "Vietnamese")
+        self.transcript_only = transcript_only
         self.chunk_seconds = chunk_seconds
         self.stride_seconds = stride_seconds
         self.sample_rate = 16000
@@ -115,17 +117,17 @@ class LocalPipeline:
             raise ValueError(f"Unknown ASR model: {self.asr_model_type}")
 
         # --- LLM Translator ---
-        log("Loading Gemma-3-4B translator...")
-        emit({"type": "status", "message": "Loading Gemma-3-4B translator..."})
-        t = time.time()
-        from mlx_lm import load
-        self.llm_model, self.llm_tokenizer = load("mlx-community/gemma-3-4b-it-qat-4bit")
-        log(f"LLM loaded in {time.time()-t:.1f}s")
+        if not self.transcript_only:
+            log("Loading Gemma-3-4B translator...")
+            emit({"type": "status", "message": "Loading Gemma-3-4B translator..."})
+            t = time.time()
+            from mlx_lm import load
+            self.llm_model, self.llm_tokenizer = load("mlx-community/gemma-3-4b-it-qat-4bit")
+            log(f"LLM loaded in {time.time()-t:.1f}s")
 
-        # Warm up LLM
-        log("Warming up LLM...")
-        emit({"type": "status", "message": "Warming up translator..."})
-        self._translate("テスト")
+            log("Warming up LLM...")
+            emit({"type": "status", "message": "Warming up translator..."})
+            self._translate("テスト")
 
         log("Pipeline ready!")
         emit({"type": "ready"})
@@ -326,26 +328,39 @@ class LocalPipeline:
             log(f"Transcript: {text}")
             log(f"New text:   {new_text}")
 
-            # Translate
-            t2 = time.time()
-            translated = self._translate(new_text)
-            t_llm = time.time() - t2
+            if self.transcript_only:
+                total = time.time() - t_start
+                log(f"ASR={t_asr:.2f}s total={total:.2f}s (transcript only)")
+                emit({
+                    "type": "result",
+                    "original": new_text,
+                    "translated": None,
+                    "language": lang if isinstance(lang, str) else (lang[0] if lang else "ja"),
+                    "timing": {
+                        "asr": round(t_asr, 2),
+                        "translate": 0,
+                        "total": round(total, 2),
+                    },
+                })
+            else:
+                t2 = time.time()
+                translated = self._translate(new_text)
+                t_llm = time.time() - t2
 
-            total = time.time() - t_start
-            log(f"ASR={t_asr:.2f}s LLM={t_llm:.2f}s total={total:.2f}s")
+                total = time.time() - t_start
+                log(f"ASR={t_asr:.2f}s LLM={t_llm:.2f}s total={total:.2f}s")
 
-            # Emit combined result
-            emit({
-                "type": "result",
-                "original": new_text,
-                "translated": translated,
-                "language": lang if isinstance(lang, str) else (lang[0] if lang else "ja"),
-                "timing": {
-                    "asr": round(t_asr, 2),
-                    "translate": round(t_llm, 2),
-                    "total": round(total, 2),
-                },
-            })
+                emit({
+                    "type": "result",
+                    "original": new_text,
+                    "translated": translated,
+                    "language": lang if isinstance(lang, str) else (lang[0] if lang else "ja"),
+                    "timing": {
+                        "asr": round(t_asr, 2),
+                        "translate": round(t_llm, 2),
+                        "total": round(total, 2),
+                    },
+                })
 
             self.prev_text = text  # Store FULL text for next dedup
 
@@ -411,6 +426,8 @@ def main():
     parser.add_argument("--stride-seconds", type=int, default=5, help="Stride between chunks in seconds")
     parser.add_argument("--test", action="store_true", help="Run test with sample audio file")
     parser.add_argument("--test-file", default="/tmp/test_japanese.wav", help="Test audio file")
+    parser.add_argument("--transcript-only", action="store_true",
+                        help="Transcribe only, skip translation")
     args = parser.parse_args()
 
     if args.test:
@@ -421,6 +438,7 @@ def main():
             target_lang=args.target_lang,
             chunk_seconds=args.chunk_seconds,
             stride_seconds=args.stride_seconds,
+            transcript_only=args.transcript_only,
         )
 
         log(f"Test mode: processing {args.test_file}")
@@ -449,6 +467,7 @@ def main():
             target_lang=args.target_lang,
             chunk_seconds=args.chunk_seconds,
             stride_seconds=args.stride_seconds,
+            transcript_only=args.transcript_only,
         )
         pipeline.run()
 

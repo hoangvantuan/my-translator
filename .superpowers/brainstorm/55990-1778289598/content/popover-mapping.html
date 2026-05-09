@@ -1,0 +1,60 @@
+<h2>Phân loại: Popover vs Toggle/Action</h2>
+<p class="subtitle">Xác nhận feature nào cần popover chi tiết, feature nào chỉ là nút bấm đơn</p>
+
+<div style="margin-bottom: 24px;">
+  <div class="mockup">
+    <div class="mockup-header">Preview: Single row với popover</div>
+    <div class="mockup-body" style="padding: 20px;">
+      <div style="display: flex; gap: 6px; align-items: center; justify-content: center; background: rgba(255,255,255,0.95); padding: 6px 10px; border-radius: 14px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); width: fit-content; margin: 0 auto;">
+        <span style="padding: 3px 7px; background: rgba(59,130,246,0.1); border: 1px solid rgba(59,130,246,0.3); border-radius: 6px; font-size: 11px;">🔊▾</span>
+        <span style="padding: 3px 7px; font-size: 11px; opacity: 0.6;">💬</span>
+        <span style="padding: 3px 7px; font-size: 11px;">📑</span>
+        <span style="padding: 3px 7px; border: 1px solid rgba(0,0,0,0.08); border-radius: 6px; font-size: 11px;">Aa▾</span>
+        <span style="padding: 3px 7px; font-size: 11px;">📋</span>
+        <span style="padding: 3px 7px; font-size: 11px;">🕐</span>
+        <span style="padding: 3px 7px; font-size: 11px;">⚙</span>
+        <span style="padding: 3px 7px; background: #ef4444; color: white; border-radius: 6px; font-size: 11px;">⏹</span>
+        <span style="padding: 3px 7px; background: #3b82f6; color: white; border-radius: 6px; font-size: 11px;">📌</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+  <!-- Popover group -->
+  <div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 12px; padding: 16px;">
+    <h3 style="margin: 0 0 12px; color: #166534;">🔽 Cần Popover (có chi tiết bên trong)</h3>
+    <div style="display: flex; flex-direction: column; gap: 10px;">
+      <div style="background: white; padding: 10px 12px; border-radius: 8px;">
+        <strong style="font-size: 13px;">🔊▾ Source</strong>
+        <div style="margin-top: 6px; padding: 8px; background: #f8fafc; border-radius: 6px; font-size: 12px;">
+          Popover: 3 nút chọn (System / Mic / Both)
+        </div>
+      </div>
+      <div style="background: white; padding: 10px 12px; border-radius: 8px;">
+        <strong style="font-size: 13px;">Aa▾ Text Appearance</strong>
+        <div style="margin-top: 6px; padding: 8px; background: #f8fafc; border-radius: 6px; font-size: 12px;">
+          Popover: Font size (A− 16 A+) + Color picker (6 dots) + Opacity slider
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toggle/Action group -->
+  <div style="background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 12px; padding: 16px;">
+    <h3 style="margin: 0 0 12px; color: #1e40af;">👆 Toggle / Action (click = done)</h3>
+    <div style="display: flex; flex-direction: column; gap: 8px; font-size: 13px;">
+      <div style="background: white; padding: 8px 12px; border-radius: 8px;">💬 <strong>TTS</strong> — toggle on/off</div>
+      <div style="background: white; padding: 8px 12px; border-radius: 8px;">📑 <strong>View mode</strong> — cycle off→below→dual</div>
+      <div style="background: white; padding: 8px 12px; border-radius: 8px;">📋 <strong>Copy</strong> — copy transcript</div>
+      <div style="background: white; padding: 8px 12px; border-radius: 8px;">🕐 <strong>Sessions</strong> — mở sessions view</div>
+      <div style="background: white; padding: 8px 12px; border-radius: 8px;">⚙ <strong>Settings</strong> — mở settings page</div>
+      <div style="background: white; padding: 8px 12px; border-radius: 8px;">⏹ <strong>Start/Stop</strong> — toggle recording</div>
+      <div style="background: white; padding: 8px 12px; border-radius: 8px;">📌 <strong>Pin</strong> — toggle pin on top</div>
+    </div>
+  </div>
+</div>
+
+<div style="margin-top: 20px; padding: 14px; background: #fefce8; border: 1px solid #fef08a; border-radius: 12px;">
+  <p style="margin: 0; font-size: 13px;"><strong>Đúng phân loại này không?</strong> Nếu bạn muốn thêm/bớt feature nào vào nhóm popover, cho mình biết.</p>
+</div>

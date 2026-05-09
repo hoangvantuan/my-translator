@@ -1,0 +1,113 @@
+<h2>Gộp tất cả vào bottom-right: chọn layout</h2>
+<p class="subtitle">14 controls gộp lại, cần tổ chức sao cho gọn mà vẫn dễ dùng</p>
+
+<div class="options">
+  <div class="option" data-choice="a" onclick="toggleSelect(this)">
+    <div class="letter">A</div>
+    <div class="content">
+      <h3>Single row dài (bottom-right)</h3>
+      <p>Tất cả trên 1 hàng ngang, groups ngăn bởi separator. Giống toolbar hiện tại nhưng dời xuống bottom.</p>
+      <div style="margin-top: 12px; padding: 12px; background: #f8fafc; border-radius: 8px; overflow-x: auto;">
+        <div style="display: flex; gap: 6px; align-items: center; white-space: nowrap; background: rgba(255,255,255,0.95); padding: 6px 10px; border-radius: 14px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); width: fit-content;">
+          <div style="display: flex; gap: 2px; background: rgba(0,0,0,0.05); padding: 3px 6px; border-radius: 10px;">
+            <span style="padding: 3px 6px; background: #3b82f6; color: white; border-radius: 6px; font-size: 10px;">🔊</span>
+            <span style="padding: 3px 6px; font-size: 10px;">🎤</span>
+            <span style="padding: 3px 6px; font-size: 10px;">🔊🎤</span>
+          </div>
+          <span style="color: #ddd; font-size: 12px;">│</span>
+          <span style="font-size: 10px;">💬</span>
+          <span style="font-size: 10px;">📑</span>
+          <span style="color: #ddd; font-size: 12px;">│</span>
+          <span style="font-size: 10px;">A−</span>
+          <span style="font-size: 9px; color: #888;">16</span>
+          <span style="font-size: 10px;">A+</span>
+          <div style="width: 16px; height: 16px; border-radius: 50%; background: #111827;"></div>
+          <div style="width: 16px; height: 16px; border-radius: 50%; background: rgba(0,0,0,0.15);"></div>
+          <span style="color: #ddd; font-size: 12px;">│</span>
+          <span style="font-size: 10px;">📋</span>
+          <span style="font-size: 10px;">🕐</span>
+          <span style="font-size: 10px;">⚙</span>
+          <span style="color: #ddd; font-size: 12px;">│</span>
+          <span style="padding: 3px 6px; background: #ef4444; color: white; border-radius: 6px; font-size: 10px;">⏹</span>
+          <span style="padding: 3px 6px; background: #3b82f6; color: white; border-radius: 6px; font-size: 10px;">📌</span>
+        </div>
+        <p style="margin: 8px 0 0; color: #999; font-size: 11px;">⚠ Rất dài, có thể tràn window nhỏ</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="option" data-choice="b" onclick="toggleSelect(this)">
+    <div class="letter">B</div>
+    <div class="content">
+      <h3>Compact vertical stack (bottom-right)</h3>
+      <p>2-3 hàng xếp chồng. Hàng trên: source + display. Hàng dưới: font/color/opacity + actions. Gọn hơn, không tràn.</p>
+      <div style="margin-top: 12px; padding: 12px; background: #f8fafc; border-radius: 8px;">
+        <div style="display: flex; flex-direction: column; gap: 4px; align-items: flex-end;">
+          <!-- Row 1: Source + Display + Control -->
+          <div style="display: flex; gap: 4px; align-items: center; background: rgba(255,255,255,0.95); padding: 4px 8px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+            <div style="display: flex; gap: 2px; background: rgba(0,0,0,0.05); padding: 2px 4px; border-radius: 8px;">
+              <span style="padding: 2px 5px; background: #3b82f6; color: white; border-radius: 5px; font-size: 10px;">🔊</span>
+              <span style="padding: 2px 5px; font-size: 10px;">🎤</span>
+              <span style="padding: 2px 5px; font-size: 10px;">🔊🎤</span>
+            </div>
+            <span style="color: #ddd; font-size: 10px;">│</span>
+            <span style="font-size: 10px;">💬</span>
+            <span style="font-size: 10px;">📑</span>
+            <span style="color: #ddd; font-size: 10px;">│</span>
+            <span style="padding: 2px 5px; background: #ef4444; color: white; border-radius: 5px; font-size: 10px;">⏹</span>
+            <span style="padding: 2px 5px; background: #3b82f6; color: white; border-radius: 5px; font-size: 10px;">📌</span>
+          </div>
+          <!-- Row 2: Font + Color + Opacity + Actions -->
+          <div style="display: flex; gap: 4px; align-items: center; background: rgba(255,255,255,0.95); padding: 4px 8px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+            <span style="font-size: 10px;">A−</span>
+            <span style="font-size: 9px; color: #888;">16</span>
+            <span style="font-size: 10px;">A+</span>
+            <div style="width: 14px; height: 14px; border-radius: 50%; background: #111827;"></div>
+            <div style="width: 14px; height: 14px; border-radius: 50%; background: rgba(0,0,0,0.15);"></div>
+            <span style="color: #ddd; font-size: 10px;">│</span>
+            <span style="font-size: 10px;">📋</span>
+            <span style="font-size: 10px;">🕐</span>
+            <span style="font-size: 10px;">⚙</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="option" data-choice="c" onclick="toggleSelect(this)">
+    <div class="letter">C</div>
+    <div class="content">
+      <h3>Minimal bar + popover groups (Recommended)</h3>
+      <p>Chỉ hiện 5-6 icon chính trên bar. Nhóm phụ (source, font/color/opacity) ẩn trong popover, click để mở. Giống floating controls hiện tại nhưng mạnh hơn.</p>
+      <div style="margin-top: 12px; padding: 12px; background: #f8fafc; border-radius: 8px;">
+        <div style="display: flex; flex-direction: column; gap: 8px; align-items: flex-end;">
+          <!-- Main bar -->
+          <div style="display: flex; gap: 6px; align-items: center; background: rgba(255,255,255,0.95); padding: 6px 10px; border-radius: 14px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+            <span style="padding: 3px 6px; background: rgba(0,0,0,0.05); border-radius: 6px; font-size: 10px;" title="Click to open source picker">🔊▾</span>
+            <span style="font-size: 10px;">💬</span>
+            <span style="font-size: 10px;">Aa▾</span>
+            <span style="font-size: 10px;">📋</span>
+            <span style="font-size: 10px;">⚙</span>
+            <span style="padding: 3px 6px; background: #ef4444; color: white; border-radius: 6px; font-size: 10px;">⏹</span>
+            <span style="padding: 3px 6px; background: #3b82f6; color: white; border-radius: 6px; font-size: 10px;">📌</span>
+          </div>
+          <!-- Popover example -->
+          <div style="background: rgba(255,255,255,0.98); padding: 8px 12px; border-radius: 12px; box-shadow: 0 4px 16px rgba(0,0,0,0.12); border: 1px solid rgba(0,0,0,0.06);">
+            <div style="font-size: 10px; color: #888; margin-bottom: 6px;">Text appearance</div>
+            <div style="display: flex; gap: 6px; align-items: center;">
+              <span style="font-size: 10px;">A−</span>
+              <span style="font-size: 9px; color: #888;">16</span>
+              <span style="font-size: 10px;">A+</span>
+              <span style="color: #ddd;">│</span>
+              <div style="width: 14px; height: 14px; border-radius: 50%; background: #111827;"></div>
+              <span style="color: #ddd;">│</span>
+              <div style="width: 14px; height: 14px; border-radius: 50%; background: rgba(0,0,0,0.15);"></div>
+              <span style="font-size: 9px; color: #888;">85%</span>
+            </div>
+          </div>
+          <p style="margin: 0; color: #888; font-size: 11px;">↑ Popover mở khi click "Aa▾"</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,71 @@
+<h2>Hiện trạng: 2 vùng control riêng biệt</h2>
+<p class="subtitle">Floating Toolbar (top) + Floating Controls (bottom-right)</p>
+
+<div class="split">
+  <div class="mockup">
+    <div class="mockup-header">Floating Toolbar (top center, hover to show)</div>
+    <div class="mockup-body" style="padding: 16px;">
+      <div style="display: flex; gap: 12px; align-items: center; justify-content: center; flex-wrap: wrap;">
+        <!-- Source group -->
+        <div style="display: flex; gap: 4px; background: rgba(0,0,0,0.06); padding: 4px 8px; border-radius: 12px;">
+          <span style="padding: 4px 8px; background: #3b82f6; color: white; border-radius: 8px; font-size: 11px;">🔊 System</span>
+          <span style="padding: 4px 8px; border-radius: 8px; font-size: 11px;">🎤 Mic</span>
+          <span style="padding: 4px 8px; border-radius: 8px; font-size: 11px;">🔊+🎤</span>
+        </div>
+        <span style="color: #ccc;">│</span>
+        <!-- Display -->
+        <div style="display: flex; gap: 4px;">
+          <span style="padding: 4px 8px; border-radius: 8px; font-size: 11px;">💬 TTS</span>
+          <span style="padding: 4px 8px; border-radius: 8px; font-size: 11px;">📑 View</span>
+        </div>
+        <span style="color: #ccc;">│</span>
+        <!-- Action -->
+        <div style="display: flex; gap: 4px;">
+          <span style="padding: 4px 8px; border-radius: 8px; font-size: 11px;">📋 Copy</span>
+          <span style="padding: 4px 8px; border-radius: 8px; font-size: 11px;">🕐 Sessions</span>
+          <span style="padding: 4px 8px; border-radius: 8px; font-size: 11px;">⚙ Settings</span>
+        </div>
+        <span style="color: #ccc;">│</span>
+        <!-- Control -->
+        <div style="display: flex; gap: 4px;">
+          <span style="padding: 4px 8px; background: #ef4444; color: white; border-radius: 8px; font-size: 11px;">⏹ Stop</span>
+          <span style="padding: 4px 8px; background: #3b82f6; color: white; border-radius: 8px; font-size: 11px;">📌 Pin</span>
+        </div>
+      </div>
+      <p style="text-align: center; margin-top: 12px; color: #888; font-size: 12px;">10 buttons, 4 groups, separated by dividers</p>
+    </div>
+  </div>
+
+  <div class="mockup">
+    <div class="mockup-header">Floating Controls (bottom-right, hover to show)</div>
+    <div class="mockup-body" style="padding: 16px;">
+      <div style="display: flex; gap: 8px; align-items: center; justify-content: center;">
+        <!-- Font controls -->
+        <div style="display: flex; gap: 2px; background: white; padding: 4px 8px; border-radius: 12px; border: 1px solid #e5e7eb;">
+          <span style="padding: 2px 6px; font-size: 11px; cursor: pointer;">A−</span>
+          <span style="padding: 2px 6px; font-size: 11px; color: #888;">16</span>
+          <span style="padding: 2px 6px; font-size: 11px; cursor: pointer;">A+</span>
+        </div>
+        <!-- Color dot -->
+        <div style="width: 22px; height: 22px; border-radius: 50%; background: #111827; border: 2px solid rgba(0,0,0,0.1); cursor: pointer;"></div>
+        <!-- Opacity dot -->
+        <div style="width: 22px; height: 22px; border-radius: 50%; background: rgba(0,0,0,0.15); border: 2px solid rgba(0,0,0,0.1); cursor: pointer; display: flex; align-items: center; justify-content: center;">
+          <span style="font-size: 9px;">◐</span>
+        </div>
+        <!-- View mode -->
+        <div style="padding: 4px 8px; font-size: 11px; background: white; border-radius: 8px; border: 1px solid #e5e7eb;">📑</div>
+      </div>
+      <p style="text-align: center; margin-top: 12px; color: #888; font-size: 12px;">Font size + Color picker + Opacity slider + View mode (duplicate)</p>
+    </div>
+  </div>
+</div>
+
+<div style="margin-top: 24px; padding: 16px; background: #fef3c7; border-radius: 12px;">
+  <h3 style="margin: 0 0 8px;">Vấn đề hiện tại</h3>
+  <ul style="margin: 0; padding-left: 20px; font-size: 14px; line-height: 1.8;">
+    <li>2 vùng control riêng biệt, user phải di chuột 2 nơi</li>
+    <li>View mode button bị duplicate (có ở cả 2 toolbar)</li>
+    <li>Floating controls (bottom-right) che nội dung transcript</li>
+    <li>Cả 2 đều show/hide on hover, gây confusion</li>
+  </ul>
+</div>

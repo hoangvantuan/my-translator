@@ -114,14 +114,14 @@ export class SonioxClient {
                 configMsg.language_hints_strict = true;
             }
 
-            // Translation config (#5: support one-way and two-way)
-            if (translationType === 'two_way' && languageA && languageB) {
+            if (translationType === 'transcript_only') {
+                // No translation config — Soniox returns original tokens only
+            } else if (translationType === 'two_way' && languageA && languageB) {
                 configMsg.translation = {
                     type: 'two_way',
                     language_a: languageA,
                     language_b: languageB,
                 };
-                // For two-way, set language hints to both languages
                 configMsg.language_hints = [languageA, languageB];
             } else if (targetLanguage) {
                 configMsg.translation = {
@@ -283,33 +283,32 @@ export class SonioxClient {
                 continue;
             }
 
-            if (token.speaker && token.translation_status === 'original') {
+            const status = token.translation_status;
+
+            if (token.speaker && (status === 'original' || !status)) {
                 speaker = token.speaker;
             }
 
-            // Capture language from original tokens
-            if (token.language && token.translation_status !== 'translation') {
+            if (token.language && status !== 'translation') {
                 language = token.language;
             }
 
-            // Track confidence scores for original final tokens
-            if (token.confidence !== undefined && token.is_final && token.translation_status === 'original') {
+            if (token.confidence !== undefined && token.is_final && (status === 'original' || !status)) {
                 confidenceSum += token.confidence;
                 confidenceCount++;
             }
 
-            if (token.translation_status === 'original') {
+            if (status === 'original' || !status) {
                 if (token.is_final) {
                     originalText += token.text;
                 } else {
                     provisionalText += token.text;
                 }
-            } else if (token.translation_status === 'translation') {
+            } else if (status === 'translation') {
                 if (token.is_final) {
                     translationText += token.text;
                 }
-            } else if (token.translation_status === 'none') {
-                // Third-language speech in two-way mode: treat as original (untranslated)
+            } else if (status === 'none') {
                 if (token.is_final) {
                     originalText += token.text;
                 } else {
