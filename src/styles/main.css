@@ -310,18 +310,15 @@ body {
   border-radius: var(--radius-lg);
   z-index: 50;
   opacity: 0;
-  visibility: hidden;
-  transition: opacity var(--transition-fast), visibility var(--transition-fast), transform var(--transition-fast);
-  transition-delay: 3s;
+  pointer-events: none;
+  transition: opacity var(--transition-fast), transform var(--transition-fast);
   transform: translateX(-50%) translateY(4px);
 }
 
-#overlay-view:hover .floating-toolbar,
-#overlay-view.toolbar-visible .floating-toolbar {
+#overlay-view:hover .floating-toolbar {
   opacity: 1;
-  visibility: visible;
+  pointer-events: auto;
   transform: translateX(-50%) translateY(0);
-  transition-delay: 0s;
 }
 
 .toolbar-separator {
@@ -784,6 +781,92 @@ body {
 .color-palette .color-dot.active {
   border-color: var(--accent-border);
   box-shadow: 0 0 0 2px var(--accent-light);
+}
+
+/* Opacity control */
+.opacity-control {
+  position: relative;
+}
+
+.opacity-trigger {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  cursor: pointer;
+  padding: 0;
+  outline: none;
+  background: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-secondary);
+  box-shadow: var(--shadow-overlay);
+  transition: all 0.15s;
+}
+
+.opacity-trigger:hover {
+  transform: scale(1.15);
+  color: var(--text-primary);
+}
+
+.opacity-popover {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--bg-toolbar);
+  border-radius: var(--radius-md);
+  padding: 8px 12px;
+  box-shadow: var(--shadow-toolbar);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  z-index: 20;
+  white-space: nowrap;
+}
+
+.opacity-popover::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 5px solid transparent;
+  border-top-color: var(--bg-toolbar);
+}
+
+.opacity-popover.hidden {
+  display: none;
+}
+
+.opacity-popover input[type="range"] {
+  width: 100px;
+  height: 4px;
+  -webkit-appearance: none;
+  appearance: none;
+  background: var(--border-color);
+  border-radius: 2px;
+  outline: none;
+  cursor: pointer;
+}
+
+.opacity-popover input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--accent);
+  cursor: pointer;
+  border: none;
+}
+
+.opacity-label {
+  font-size: 10px;
+  color: var(--text-muted);
+  min-width: 26px;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
 }
 
 /* Resize Handle */
