@@ -1357,24 +1357,8 @@ class App {
 
         // Step 2: Start audio capture
         try {
-            const audioChannel = new window.__TAURI__.core.Channel();
-            let audioChunkCount = 0;
-
-            audioChannel.onmessage = async (pcmData) => {
-                audioChunkCount++;
-                if (audioChunkCount <= 3 || audioChunkCount % 50 === 0) {
-                    console.log(`[Local] Audio batch #${audioChunkCount}, size:`, pcmData?.length || 0);
-                }
-                try {
-                    await invoke('send_audio_to_pipeline', { data: Array.from(new Uint8Array(pcmData)) });
-                } catch (e) {
-                    // Pipeline may not be ready yet
-                }
-            };
-
-            await invoke('start_capture', {
+            await invoke('start_capture_to_pipeline', {
                 source: this.currentSource,
-                channel: audioChannel,
             });
             console.log('[App] Audio capture started');
         } catch (err) {

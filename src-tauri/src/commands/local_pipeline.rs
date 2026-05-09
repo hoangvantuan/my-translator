@@ -1,11 +1,11 @@
 use std::io::Write;
 use std::process::{Child, Command, Stdio};
-use std::sync::Mutex;
+use std::sync::{Arc, Mutex};
 use tauri::ipc::Channel;
 
 /// State for the local pipeline sidecar process
 pub struct LocalPipelineState {
-    pub process: Mutex<Option<Child>>,
+    pub process: Arc<Mutex<Option<Child>>>,
 }
 
 fn log_to_file(msg: &str) {

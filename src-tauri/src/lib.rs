@@ -7,7 +7,7 @@ use audio::SystemAudioCapture;
 use commands::audio::AudioState;
 use commands::local_pipeline::LocalPipelineState;
 use settings::{Settings, SettingsState};
-use std::sync::Mutex;
+use std::sync::{Arc, Mutex};
 
 #[tauri::command]
 fn get_platform_info() -> String {
@@ -40,12 +40,13 @@ pub fn run() {
             active_receiver: Mutex::new(None),
         })
         .manage(LocalPipelineState {
-            process: Mutex::new(None),
+            process: Arc::new(Mutex::new(None)),
         })
         .invoke_handler(tauri::generate_handler![
             commands::settings::get_settings,
             commands::settings::save_settings,
             commands::audio::start_capture,
+            commands::audio::start_capture_to_pipeline,
             commands::audio::stop_capture,
             commands::audio::check_permissions,
             commands::audio::open_privacy_settings,
