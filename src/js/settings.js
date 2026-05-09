@@ -13,7 +13,7 @@ const DEFAULT_SETTINGS = {
   overlay_opacity: 0.85,
   font_size: 16,
   max_lines: 5,
-  show_original: true,
+  show_original: 'below',
   translation_mode: 'soniox',
   custom_context: null,
   elevenlabs_api_key: '',
@@ -22,7 +22,7 @@ const DEFAULT_SETTINGS = {
   tts_voice_id: '21m00Tcm4TlvDq8ikWAM',
   tts_speed: 1.2,
   edge_tts_voice: 'vi-VN-HoaiMyNeural',
-  edge_tts_speed: 50,
+  edge_tts_speed: 20,
   tts_auto_read: true,
 };
 
