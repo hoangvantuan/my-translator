@@ -12,6 +12,7 @@ class EdgeTTSRust {
         this.speed = 20; // percentage: +20% default
         this.isConnected = false;
         this._queue = [];
+        this._maxQueueSize = 5;
         this._isSpeaking = false;
 
         // Same callback interface as other TTS providers
@@ -33,9 +34,16 @@ class EdgeTTSRust {
 
     speak(text) {
         if (!text?.trim()) return;
-        this._queue.push(text.trim());
+        this._enqueueText(text.trim());
         if (!this._isSpeaking) {
             this._processQueue();
+        }
+    }
+
+    _enqueueText(text) {
+        this._queue.push(text);
+        if (this._queue.length > this._maxQueueSize) {
+            this._queue.splice(0, this._queue.length - this._maxQueueSize);
         }
     }
 

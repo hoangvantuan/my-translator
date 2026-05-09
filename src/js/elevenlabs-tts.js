@@ -19,6 +19,7 @@ class ElevenLabsTTS {
 
         // Queue text while WS is connecting
         this._textQueue = [];
+        this._maxTextQueueSize = 10;
         this._reconnectAttempts = 0;
         this._maxReconnectAttempts = 3;
         this._intentionalClose = false;
@@ -153,10 +154,17 @@ class ElevenLabsTTS {
             this._sendText(text);
         } else {
             // Queue and connect if needed
-            this._textQueue.push(text);
+            this._enqueueText(text);
             if (!this.ws || this.ws.readyState === WebSocket.CLOSED) {
                 this.connect();
             }
+        }
+    }
+
+    _enqueueText(text) {
+        this._textQueue.push(text);
+        if (this._textQueue.length > this._maxTextQueueSize) {
+            this._textQueue.splice(0, this._textQueue.length - this._maxTextQueueSize);
         }
     }
 
