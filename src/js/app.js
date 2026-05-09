@@ -274,6 +274,13 @@ class App {
             const fillCircle = opacityTrigger.querySelector('circle[fill-opacity]');
             if (fillCircle) fillCircle.setAttribute('fill-opacity', opacity);
 
+            // Update slider track fill
+            opacitySlider.style.background =
+                `linear-gradient(to right, var(--accent) 0%, var(--accent) ${pct}%, var(--border-color) ${pct}%, var(--border-color) 100%)`;
+
+            // Update popover preview opacity
+            opacityPopover.style.setProperty('--preview-opacity', opacity);
+
             // Debounced auto-save
             clearTimeout(opacitySaveTimeout);
             opacitySaveTimeout = setTimeout(async () => {
@@ -873,6 +880,17 @@ class App {
         if (liveLabel) liveLabel.textContent = `${opacityPct}%`;
         const triggerFill = document.querySelector('.opacity-trigger circle[fill-opacity]');
         if (triggerFill) triggerFill.setAttribute('fill-opacity', opacity);
+
+        // Initialize slider fill
+        if (liveSlider) {
+            liveSlider.style.background =
+                `linear-gradient(to right, var(--accent) 0%, var(--accent) ${opacityPct}%, var(--border-color) ${opacityPct}%, var(--border-color) 100%)`;
+        }
+        // Initialize popover preview
+        const opacityPopover = document.querySelector('.opacity-popover');
+        if (opacityPopover) {
+            opacityPopover.style.setProperty('--preview-opacity', opacity);
+        }
 
         // Update transcript UI
         if (this.transcriptUI) {

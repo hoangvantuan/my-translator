@@ -887,7 +887,6 @@ body {
   bottom: calc(100% + 8px);
   right: -8px;
   transform: none;
-  background: var(--bg-toolbar);
   border-radius: var(--radius-md);
   padding: 8px 12px;
   box-shadow: var(--shadow-toolbar);
@@ -896,6 +895,9 @@ body {
   gap: 6px;
   z-index: 20;
   white-space: nowrap;
+  background:
+    linear-gradient(rgba(255,255,255, var(--preview-opacity, 0.85)), rgba(255,255,255, var(--preview-opacity, 0.85))),
+    repeating-conic-gradient(#d1d5db 0% 25%, #f3f4f6 0% 50%) 0 0 / 8px 8px;
 }
 
 .opacity-popover::after {
@@ -904,7 +906,7 @@ body {
   top: 100%;
   right: 12px;
   border: 5px solid transparent;
-  border-top-color: var(--bg-toolbar);
+  border-top-color: rgba(255, 255, 255, var(--preview-opacity, 0.85));
 }
 
 .opacity-popover.hidden {
@@ -916,10 +918,10 @@ body {
   height: 4px;
   -webkit-appearance: none;
   appearance: none;
-  background: var(--border-color);
   border-radius: 2px;
   outline: none;
   cursor: pointer;
+  background: linear-gradient(to right, var(--accent) 0%, var(--accent) 85%, var(--border-color) 85%, var(--border-color) 100%);
 }
 
 .opacity-popover input[type="range"]::-webkit-slider-thumb {
@@ -930,6 +932,7 @@ body {
   background: var(--accent);
   cursor: pointer;
   border: none;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
 }
 
 .opacity-label {
