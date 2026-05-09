@@ -16,7 +16,7 @@ export class TranscriptUI {
         this.contentEl = null;
         this.maxChars = 1200;
         this.fontSize = 16;
-        this.viewMode = 'single'; // 'single' or 'dual'
+        this.showOriginal = 'below'; // 'off' | 'below' | 'dual'
 
         // Segments: each has { original, translation, status, speaker, language, confidence }
         this.segments = [];
@@ -28,13 +28,24 @@ export class TranscriptUI {
         this.currentSpeaker = null; // Track current speaker to detect changes
         this.currentLanguage = null; // Track current language to detect changes
         this.lastConfidence = null; // Last confidence score from Soniox
+
+        this._isSyncingScroll = false;
+        this._scrollSyncCleanup = null;
     }
 
     /**
      * Update display settings
      */
-    configure({ maxLines, showOriginal, fontSize, fontColor, viewMode }) {
+    configure({ maxLines, showOriginal, fontSize, fontColor }) {
         if (maxLines !== undefined) this.maxChars = maxLines * 160;
+        if (showOriginal !== undefined) {
+            this.showOriginal = showOriginal;
+            const overlay = document.getElementById('overlay-view');
+            if (overlay) {
+                overlay.classList.toggle('dual-view', showOriginal === 'dual');
+            }
+            this._render();
+        }
         if (fontSize !== undefined) {
             this.fontSize = fontSize;
             this.container.style.setProperty('--transcript-font-size', `${fontSize}px`);
@@ -42,14 +53,6 @@ export class TranscriptUI {
         if (fontColor !== undefined) {
             this.fontColor = fontColor;
             this.container.style.setProperty('--transcript-font-color', fontColor);
-        }
-        if (viewMode !== undefined) {
-            this.viewMode = viewMode;
-            const overlay = document.getElementById('overlay-view');
-            if (overlay) {
-                overlay.classList.toggle('dual-view', viewMode === 'dual');
-            }
-            this._render();
         }
     }
 
@@ -160,7 +163,6 @@ export class TranscriptUI {
       </div>
     `;
         this.segments = [];
-        this.sessionLog = [];
         this.provisionalText = '';
         this.provisionalSpeaker = null;
         this.provisionalLanguage = null;
@@ -362,7 +364,7 @@ export class TranscriptUI {
         this._ensureContent();
         this._trimSegments();
 
-        if (this.viewMode === 'dual') {
+        if (this.showOriginal === 'dual') {
             this._renderDual();
         } else {
             this._renderSingle();
@@ -375,13 +377,11 @@ export class TranscriptUI {
         let lastRenderedLang = null;
 
         for (const seg of this.segments) {
-            // Speaker label
             if (seg.speaker && seg.speaker !== lastRenderedSpeaker) {
                 html += `<span class="speaker-label">Speaker ${seg.speaker}:</span> `;
                 lastRenderedSpeaker = seg.speaker;
             }
 
-            // Language badge
             if (seg.language && seg.language !== lastRenderedLang) {
                 html += `<span class="lang-badge">${this._langEmoji(seg.language)}</span> `;
                 lastRenderedLang = seg.language;
@@ -391,9 +391,11 @@ export class TranscriptUI {
                 const confidenceClass = (seg.confidence !== null && seg.confidence < 0.7) ? ' low-confidence' : '';
                 html += `<div class="seg-block">`;
                 html += `<div class="seg-translated${confidenceClass}">${this._esc(seg.translation)}</div>`;
+                if (this.showOriginal === 'below' && seg.original) {
+                    html += `<div class="seg-original">${this._esc(seg.original)}</div>`;
+                }
                 html += `</div>`;
             }
-            // Skip 'original' segments in single mode — wait for translation
         }
 
         if (this.provisionalText) {
@@ -475,6 +477,42 @@ export class TranscriptUI {
             } else {
                 tgtPanel.scrollTop = tgtScrollState.scrollTop;
             }
+        }
+
+        if (srcPanel && tgtPanel) {
+            this._setupScrollSync(srcPanel, tgtPanel);
+        }
+    }
+
+    _setupScrollSync(srcPanel, tgtPanel) {
+        this._teardownScrollSync();
+
+        const syncScroll = (source, target) => {
+            if (this._isSyncingScroll) return;
+            this._isSyncingScroll = true;
+            const maxScroll = source.scrollHeight - source.clientHeight;
+            const ratio = maxScroll > 0 ? source.scrollTop / maxScroll : 0;
+            const targetMax = target.scrollHeight - target.clientHeight;
+            target.scrollTop = ratio * targetMax;
+            requestAnimationFrame(() => { this._isSyncingScroll = false; });
+        };
+
+        const onSrcScroll = () => syncScroll(srcPanel, tgtPanel);
+        const onTgtScroll = () => syncScroll(tgtPanel, srcPanel);
+
+        srcPanel.addEventListener('scroll', onSrcScroll, { passive: true });
+        tgtPanel.addEventListener('scroll', onTgtScroll, { passive: true });
+
+        this._scrollSyncCleanup = () => {
+            srcPanel.removeEventListener('scroll', onSrcScroll);
+            tgtPanel.removeEventListener('scroll', onTgtScroll);
+        };
+    }
+
+    _teardownScrollSync() {
+        if (this._scrollSyncCleanup) {
+            this._scrollSyncCleanup();
+            this._scrollSyncCleanup = null;
         }
     }
 
