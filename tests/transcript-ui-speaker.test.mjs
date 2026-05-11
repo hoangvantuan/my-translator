@@ -162,3 +162,63 @@ test('_renderDual no border when only 1 speaker', () => {
     assert.equal(srcTexts.length, 1);
     assert.ok(!srcTexts[0].classList.contains('speaker-border-1'));
 });
+
+test('integration: full 2-speaker flow with translation', () => {
+    const { container } = setupDom();
+    const ui = new TranscriptUI(container);
+
+    // Speaker 1 nói tiếng Nhật
+    ui.addOriginal('こんにちは', '1', 'ja');
+    ui.addTranslation('Xin chào', '1', 'ja');
+
+    // Speaker 2 nói tiếng Anh
+    ui.addOriginal('Hello', '2', 'en');
+    ui.addTranslation('Xin chào bạn', '2', 'en');
+
+    // Speaker 1 nói tiếp
+    ui.addOriginal('元気ですか', '1', 'ja');
+    ui.addTranslation('Khỏe không?', '1', 'ja');
+
+    assert.equal(ui.segments.length, 3);
+
+    // All segments have correct speaker
+    assert.equal(ui.segments[0].speaker, '1');
+    assert.equal(ui.segments[1].speaker, '2');
+    assert.equal(ui.segments[2].speaker, '1');
+
+    // Rendered with borders
+    const blocks = container.querySelectorAll('.seg-block');
+    assert.equal(blocks.length, 3);
+    assert.ok(blocks[0].classList.contains('speaker-border-1'));
+    assert.ok(blocks[1].classList.contains('speaker-border-2'));
+    assert.ok(blocks[2].classList.contains('speaker-border-1'));
+});
+
+test('integration: single speaker has no borders', () => {
+    const { container } = setupDom();
+    const ui = new TranscriptUI(container);
+
+    ui.addOriginal('Hello', '1', 'en');
+    ui.addTranslation('Xin chào');
+
+    ui.addOriginal('World', '1', 'en');
+    ui.addTranslation('Thế giới');
+
+    const blocks = container.querySelectorAll('.seg-block');
+    for (const block of blocks) {
+        assert.ok(!block.className.includes('speaker-border'));
+    }
+});
+
+test('integration: sessionLog preserves speaker through translation', () => {
+    const { container } = setupDom();
+    const ui = new TranscriptUI(container);
+
+    ui.addOriginal('Test', '1', 'en');
+    ui.addTranslation('Thử', '1', 'en');
+
+    assert.equal(ui.sessionLog.length, 1);
+    assert.equal(ui.sessionLog[0].speaker, '1');
+    assert.equal(ui.sessionLog[0].language, 'en');
+    assert.equal(ui.sessionLog[0].translation, 'Thử');
+});
