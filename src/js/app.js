@@ -566,8 +566,8 @@ class App {
             }
         };
 
-        sonioxClient.onTranslation = (text) => {
-            this.transcriptUI.addTranslation(text);
+        sonioxClient.onTranslation = (text, speaker, language) => {
+            this.transcriptUI.addTranslation(text, speaker, language);
             this._speakIfEnabled(text);
         };
 
