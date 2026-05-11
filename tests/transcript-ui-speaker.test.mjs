@@ -87,3 +87,45 @@ test('_speakerIndex resets after showPlaceholder()', () => {
 
     assert.equal(ui._speakerIndex('3'), 1);
 });
+
+test('_renderSingle adds speaker-border class when ≥2 speakers', () => {
+    const { container } = setupDom();
+    const ui = new TranscriptUI(container);
+    ui.transcriptOnly = true;
+
+    ui.addOriginal('Hello', '1', 'en');
+    ui.addOriginal('Bonjour', '2', 'fr');
+
+    const blocks = container.querySelectorAll('.seg-block');
+    assert.equal(blocks.length, 2);
+    assert.ok(blocks[0].classList.contains('speaker-border-1'));
+    assert.ok(blocks[1].classList.contains('speaker-border-2'));
+});
+
+test('_renderSingle no border class when only 1 speaker', () => {
+    const { container } = setupDom();
+    const ui = new TranscriptUI(container);
+    ui.transcriptOnly = true;
+
+    ui.addOriginal('Hello', '1', 'en');
+    ui.addOriginal('World', '1', 'en');
+
+    const blocks = container.querySelectorAll('.seg-block');
+    assert.equal(blocks.length, 2);
+    assert.ok(!blocks[0].classList.contains('speaker-border-1'));
+    assert.ok(!blocks[1].classList.contains('speaker-border-1'));
+});
+
+test('_renderSingle provisional text gets speaker border in multi-speaker', () => {
+    const { container } = setupDom();
+    const ui = new TranscriptUI(container);
+    ui.transcriptOnly = true;
+
+    ui.addOriginal('Hello', '1', 'en');
+    ui.addOriginal('Bonjour', '2', 'fr');
+    ui.setProvisional('Hola', '2', 'es');
+
+    const blocks = container.querySelectorAll('.seg-block');
+    assert.equal(blocks.length, 3);
+    assert.ok(blocks[2].classList.contains('speaker-border-2'));
+});

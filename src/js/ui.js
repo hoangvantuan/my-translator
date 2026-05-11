@@ -436,11 +436,20 @@ export class TranscriptUI {
     }
 
     _renderSingle() {
+        const uniqueSpeakers = new Set(
+            this.segments.map(s => s.speaker).filter(Boolean)
+        );
+        const multiSpeaker = uniqueSpeakers.size >= 2;
+
         let html = '';
         let lastRenderedSpeaker = null;
         let lastRenderedLang = null;
 
         for (const seg of this.segments) {
+            const borderClass = (multiSpeaker && seg.speaker)
+                ? ` speaker-border-${this._speakerIndex(seg.speaker)}`
+                : '';
+
             if (seg.speaker && seg.speaker !== lastRenderedSpeaker) {
                 html += `<span class="speaker-label">Speaker ${seg.speaker}:</span> `;
                 lastRenderedSpeaker = seg.speaker;
@@ -453,7 +462,7 @@ export class TranscriptUI {
 
             if (seg.status === 'translated' && seg.translation) {
                 const confidenceClass = (seg.confidence !== null && seg.confidence < 0.7) ? ' low-confidence' : '';
-                html += `<div class="seg-block">`;
+                html += `<div class="seg-block${borderClass}">`;
                 html += `<div class="seg-translated${confidenceClass}">${this._esc(seg.translation)}</div>`;
                 if (this.showOriginal === 'below' && seg.original) {
                     html += `<div class="seg-original">${this._esc(seg.original)}</div>`;
@@ -461,20 +470,24 @@ export class TranscriptUI {
                 html += `</div>`;
             } else if (this.transcriptOnly && seg.status === 'original' && seg.original) {
                 const confidenceClass = (seg.confidence !== null && seg.confidence < 0.7) ? ' low-confidence' : '';
-                html += `<div class="seg-block">`;
+                html += `<div class="seg-block${borderClass}">`;
                 html += `<div class="seg-translated${confidenceClass}">${this._esc(seg.original)}</div>`;
                 html += `</div>`;
             }
         }
 
         if (this.provisionalText) {
+            const provBorderClass = (multiSpeaker && this.provisionalSpeaker)
+                ? ` speaker-border-${this._speakerIndex(this.provisionalSpeaker)}`
+                : '';
+
             if (this.provisionalSpeaker && this.provisionalSpeaker !== lastRenderedSpeaker) {
                 html += `<span class="speaker-label">Speaker ${this.provisionalSpeaker}:</span> `;
             }
             if (this.provisionalLanguage && this.provisionalLanguage !== lastRenderedLang) {
                 html += `<span class="lang-badge">${this._langEmoji(this.provisionalLanguage)}</span> `;
             }
-            html += `<div class="seg-block"><div class="seg-provisional">${this._esc(this.provisionalText)}</div></div>`;
+            html += `<div class="seg-block${provBorderClass}"><div class="seg-provisional">${this._esc(this.provisionalText)}</div></div>`;
         }
 
         this.contentEl.innerHTML = html;
