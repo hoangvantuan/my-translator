@@ -501,12 +501,21 @@ export class TranscriptUI {
         const srcScrollState = oldSrcPanel ? this._getScrollState(oldSrcPanel) : { nearBottom: true, scrollTop: 0 };
         const tgtScrollState = oldTgtPanel ? this._getScrollState(oldTgtPanel) : { nearBottom: true, scrollTop: 0 };
 
+        const uniqueSpeakers = new Set(
+            this.segments.map(s => s.speaker).filter(Boolean)
+        );
+        const multiSpeaker = uniqueSpeakers.size >= 2;
+
         let srcHtml = '';
         let tgtHtml = '';
         let lastSpeaker = null;
         let lastLang = null;
 
         for (const seg of this.segments) {
+            const borderClass = (multiSpeaker && seg.speaker)
+                ? ` speaker-border-${this._speakerIndex(seg.speaker)}`
+                : '';
+
             let speakerHtml = '';
             if (seg.speaker && seg.speaker !== lastSpeaker) {
                 speakerHtml = `<div class="speaker-label">Speaker ${seg.speaker}:</div>`;
@@ -522,20 +531,23 @@ export class TranscriptUI {
             if (seg.status === 'translated' && seg.translation) {
                 const confidenceClass = (seg.confidence !== null && seg.confidence < 0.7) ? ' low-confidence' : '';
                 srcHtml += speakerHtml + langHtml;
-                srcHtml += `<div class="seg-text">${this._esc(seg.original || '')}</div>`;
+                srcHtml += `<div class="seg-text${borderClass}">${this._esc(seg.original || '')}</div>`;
                 tgtHtml += speakerHtml ? '<div class="speaker-label">&nbsp;</div>' : '';
-                tgtHtml += `<div class="seg-text${confidenceClass}">${this._esc(seg.translation)}</div>`;
+                tgtHtml += `<div class="seg-text${borderClass}${confidenceClass}">${this._esc(seg.translation)}</div>`;
             } else if (seg.status === 'original' && seg.original) {
                 srcHtml += speakerHtml + langHtml;
-                srcHtml += `<div class="seg-text pending">${this._esc(seg.original)}</div>`;
+                srcHtml += `<div class="seg-text${borderClass} pending">${this._esc(seg.original)}</div>`;
                 tgtHtml += speakerHtml ? '<div class="speaker-label">&nbsp;</div>' : '';
-                tgtHtml += `<div class="seg-text pending">...</div>`;
+                tgtHtml += `<div class="seg-text${borderClass} pending">...</div>`;
             }
         }
 
         if (this.provisionalText) {
-            srcHtml += `<div class="seg-text pending">${this._esc(this.provisionalText)}</div>`;
-            tgtHtml += `<div class="seg-text pending">...</div>`;
+            const provBorderClass = (multiSpeaker && this.provisionalSpeaker)
+                ? ` speaker-border-${this._speakerIndex(this.provisionalSpeaker)}`
+                : '';
+            srcHtml += `<div class="seg-text${provBorderClass} pending">${this._esc(this.provisionalText)}</div>`;
+            tgtHtml += `<div class="seg-text${provBorderClass} pending">...</div>`;
         }
 
         this.contentEl.innerHTML = `

@@ -129,3 +129,36 @@ test('_renderSingle provisional text gets speaker border in multi-speaker', () =
     assert.equal(blocks.length, 3);
     assert.ok(blocks[2].classList.contains('speaker-border-2'));
 });
+
+test('_renderDual adds speaker-border class to seg-text when ≥2 speakers', () => {
+    const { container } = setupDom();
+    const ui = new TranscriptUI(container);
+    ui.showOriginal = 'dual';
+
+    ui.addOriginal('こんにちは', '1', 'ja');
+    ui.addTranslation('Hello', '1', 'ja');
+    ui.addOriginal('Bonjour', '2', 'fr');
+    ui.addTranslation('Xin chào', '2', 'fr');
+
+    const srcTexts = container.querySelectorAll('.panel-source .seg-text');
+    const tgtTexts = container.querySelectorAll('.panel-translation .seg-text');
+
+    assert.equal(srcTexts.length, 2);
+    assert.ok(srcTexts[0].classList.contains('speaker-border-1'));
+    assert.ok(srcTexts[1].classList.contains('speaker-border-2'));
+    assert.ok(tgtTexts[0].classList.contains('speaker-border-1'));
+    assert.ok(tgtTexts[1].classList.contains('speaker-border-2'));
+});
+
+test('_renderDual no border when only 1 speaker', () => {
+    const { container } = setupDom();
+    const ui = new TranscriptUI(container);
+    ui.showOriginal = 'dual';
+
+    ui.addOriginal('Hello', '1', 'en');
+    ui.addTranslation('Xin chào', '1', 'en');
+
+    const srcTexts = container.querySelectorAll('.panel-source .seg-text');
+    assert.equal(srcTexts.length, 1);
+    assert.ok(!srcTexts[0].classList.contains('speaker-border-1'));
+});
