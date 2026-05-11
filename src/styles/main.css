@@ -634,6 +634,56 @@ body {
   margin-bottom: 2px;
 }
 
+/* Speaker color palette */
+:root {
+    --speaker-1: #6366f1;
+    --speaker-2: #10b981;
+    --speaker-3: #f59e0b;
+    --speaker-4: #f43f5e;
+    --speaker-default: #64748b;
+}
+
+/* Speaker color borders — active when ≥2 speakers */
+.speaker-border-1 { border-left: 3px solid var(--speaker-1); padding-left: 8px; }
+.speaker-border-2 { border-left: 3px solid var(--speaker-2); padding-left: 8px; }
+.speaker-border-3 { border-left: 3px solid var(--speaker-3); padding-left: 8px; }
+.speaker-border-4 { border-left: 3px solid var(--speaker-4); padding-left: 8px; }
+.speaker-border-default { border-left: 3px solid var(--speaker-default); padding-left: 8px; }
+
+/* Speaker label color matches border */
+.speaker-border-1 .speaker-label { color: var(--speaker-1); }
+.speaker-border-2 .speaker-label { color: var(--speaker-2); }
+.speaker-border-3 .speaker-label { color: var(--speaker-3); }
+.speaker-border-4 .speaker-label { color: var(--speaker-4); }
+.speaker-border-default .speaker-label { color: var(--speaker-default); }
+
+/* Lang badge color matches speaker */
+.speaker-border-1 .lang-badge {
+    background: rgba(99, 102, 241, 0.1);
+    color: var(--speaker-1);
+    border-color: rgba(99, 102, 241, 0.3);
+}
+.speaker-border-2 .lang-badge {
+    background: rgba(16, 185, 129, 0.1);
+    color: var(--speaker-2);
+    border-color: rgba(16, 185, 129, 0.3);
+}
+.speaker-border-3 .lang-badge {
+    background: rgba(245, 158, 11, 0.1);
+    color: var(--speaker-3);
+    border-color: rgba(245, 158, 11, 0.3);
+}
+.speaker-border-4 .lang-badge {
+    background: rgba(244, 63, 94, 0.1);
+    color: var(--speaker-4);
+    border-color: rgba(244, 63, 94, 0.3);
+}
+.speaker-border-default .lang-badge {
+    background: rgba(100, 116, 139, 0.1);
+    color: var(--speaker-default);
+    border-color: rgba(100, 116, 139, 0.3);
+}
+
 /* Language badge */
 .lang-badge {
   display: inline-block;
