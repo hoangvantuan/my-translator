@@ -116,7 +116,7 @@ export class TranscriptUI {
     /**
      * Apply translation to the oldest untranslated segment
      */
-    addTranslation(text) {
+    addTranslation(text, speaker = null, language = null) {
         const seg = this.segments.find(s => s.status === 'original');
         if (seg) {
             seg.translation = text;
@@ -134,7 +134,8 @@ export class TranscriptUI {
                 original: '',
                 translation: text,
                 status: 'translated',
-                speaker: null,
+                speaker: speaker || null,
+                language: language || null,
                 createdAt: Date.now(),
             };
             this.segments.push(newSeg);
@@ -196,6 +197,7 @@ export class TranscriptUI {
         this.currentSpeaker = null;
         this.currentLanguage = null;
         this.lastConfidence = null;
+        this._speakerMap = null;
         this.contentEl = null;
     }
 
@@ -363,6 +365,7 @@ export class TranscriptUI {
         this.currentSpeaker = null;
         this.currentLanguage = null;
         this.lastConfidence = null;
+        this._speakerMap = null;
         this.contentEl = null;
     }
 
@@ -382,6 +385,15 @@ export class TranscriptUI {
             this.contentEl.className = 'transcript-flow';
             this.container.appendChild(this.contentEl);
         }
+    }
+
+    _speakerIndex(speaker) {
+        if (!this._speakerMap) this._speakerMap = new Map();
+        if (!this._speakerMap.has(speaker)) {
+            this._speakerMap.set(speaker, this._speakerMap.size + 1);
+        }
+        const idx = this._speakerMap.get(speaker);
+        return idx <= 4 ? idx : 'default';
     }
 
     _removeListening() {
