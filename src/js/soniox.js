@@ -330,7 +330,7 @@ export class SonioxClient {
 
         // Emit translation + store for context carryover
         if (translationText.trim()) {
-            this.onTranslation?.(translationText);
+            this.onTranslation?.(translationText, speaker, language);
             this._addToHistory(translationText);
         }
 
