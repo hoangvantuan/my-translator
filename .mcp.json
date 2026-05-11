@@ -5,6 +5,14 @@
       "command": "gitnexus",
       "args": ["mcp"],
       "env": {}
+    },
+    "soniox-docs": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "mcp-remote",
+        "https://soniox.com/docs/api/mcp/mcp"
+      ]
     }
   }
 }
