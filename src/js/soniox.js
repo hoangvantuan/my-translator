@@ -19,8 +19,8 @@ const SONIOX_ENDPOINT = 'wss://stt-rt.soniox.com/transcribe-websocket';
 const MAX_RECONNECT = 3;
 const RECONNECT_DELAY_MS = 2000;
 
-// Session reset: 3 minutes
-const SESSION_DURATION_MS = 3 * 60 * 1000;
+// Session reset: 15 minutes (Soniox supports up to 5 hours)
+const SESSION_DURATION_MS = 15 * 60 * 1000;
 
 // Keep last N chars of translations for context carryover
 const CONTEXT_HISTORY_CHARS = 500;
@@ -99,7 +99,7 @@ export class SonioxClient {
                 sample_rate: 16000,
                 num_channels: 1,
                 enable_endpoint_detection: true,
-                max_endpoint_delay_ms: endpointDelay || 3000,
+                max_endpoint_delay_ms: endpointDelay || 1000,
                 enable_speaker_diarization: true,
                 enable_language_identification: true,
             };
@@ -408,12 +408,19 @@ export class SonioxClient {
         // General key-value pairs
         const general = [];
         if (customContext?.general && Array.isArray(customContext.general)) {
-            // New format: array of {key, value}
             general.push(...customContext.general);
         } else if (customContext?.domain) {
-            // Legacy format: single domain string → convert to general
             general.push({ key: 'domain', value: customContext.domain });
         }
+
+        // Speaker hints for better diarization
+        if (customContext?.speakerCount) {
+            general.push({ key: 'speakers', value: `${customContext.speakerCount} speakers` });
+        }
+        if (customContext?.speakerInfo) {
+            general.push({ key: 'speakers', value: customContext.speakerInfo });
+        }
+
         if (general.length > 0) {
             context.general = general;
             hasContent = true;

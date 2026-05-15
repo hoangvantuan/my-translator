@@ -16,49 +16,59 @@ impl SCStreamOutputTrait for AudioHandler {
         match output_type {
             SCStreamOutputType::Audio => {
                 if let Some(audio_buffer_list) = sample.audio_buffer_list() {
-                    // ScreenCaptureKit with stereo config may deliver audio as:
-                    // - 2 separate mono buffers (deinterleaved L/R), OR
-                    // - 1 interleaved stereo buffer
-                    // We only need ONE channel for speech, so take just the first buffer
-                    let mut iter = audio_buffer_list.into_iter();
-                    if let Some(audio_buffer) = iter.next() {
-                        let raw_data = audio_buffer.data();
+                    let buffers: Vec<_> = audio_buffer_list.into_iter().collect();
+                    if buffers.is_empty() {
+                        return;
+                    }
 
-                        if raw_data.is_empty() {
-                            return;
-                        }
+                    let first_data = buffers[0].data();
+                    if first_data.is_empty() {
+                        return;
+                    }
 
-                        // Interpret raw bytes as f32 samples (mono — first channel only)
-                        let f32_samples: &[f32] = unsafe {
+                    let first_samples: &[f32] = unsafe {
+                        std::slice::from_raw_parts(
+                            first_data.as_ptr() as *const f32,
+                            first_data.len() / 4,
+                        )
+                    };
+
+                    // Mix L+R channels to mono (average both buffers if stereo)
+                    let mono: Vec<f32> = if buffers.len() >= 2 {
+                        let second_data = buffers[1].data();
+                        let second_samples: &[f32] = unsafe {
                             std::slice::from_raw_parts(
-                                raw_data.as_ptr() as *const f32,
-                                raw_data.len() / 4,
+                                second_data.as_ptr() as *const f32,
+                                second_data.len() / 4,
                             )
                         };
+                        let len = first_samples.len().min(second_samples.len());
+                        (0..len)
+                            .map(|i| (first_samples[i] + second_samples[i]) * 0.5)
+                            .collect()
+                    } else {
+                        first_samples.to_vec()
+                    };
 
-                        // Downsample 48kHz -> 16kHz (factor of 3)
-                        let source_rate = 48000u32;
-                        let ratio = source_rate / TARGET_SAMPLE_RATE; // 3
+                    // Downsample 48kHz → 16kHz using box filter (average each group of 3)
+                    // Box filter acts as anti-alias, preventing frequency folding artifacts
+                    let ratio = (48000u32 / TARGET_SAMPLE_RATE) as usize;
+                    let downsampled: Vec<f32> = mono
+                        .chunks(ratio)
+                        .map(|chunk| chunk.iter().sum::<f32>() / chunk.len() as f32)
+                        .collect();
 
-                        let downsampled: Vec<f32> = f32_samples
-                            .iter()
-                            .step_by(ratio as usize)
-                            .copied()
-                            .collect();
+                    let pcm_s16: Vec<u8> = downsampled
+                        .iter()
+                        .flat_map(|&sample| {
+                            let clamped = sample.clamp(-1.0, 1.0);
+                            let s16 = (clamped * 32767.0) as i16;
+                            s16.to_le_bytes()
+                        })
+                        .collect();
 
-                        // Convert f32 [-1.0, 1.0] to i16 PCM s16le
-                        let pcm_s16: Vec<u8> = downsampled
-                            .iter()
-                            .flat_map(|&sample| {
-                                let clamped = sample.clamp(-1.0, 1.0);
-                                let s16 = (clamped * 32767.0) as i16;
-                                s16.to_le_bytes()
-                            })
-                            .collect();
-
-                        if !pcm_s16.is_empty() {
-                            let _ = self.sender.send(pcm_s16);
-                        }
+                    if !pcm_s16.is_empty() {
+                        let _ = self.sender.send(pcm_s16);
                     }
                 }
             }

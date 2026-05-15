@@ -96,8 +96,8 @@ pub fn start_capture(
     let stop_flag_clone = stop_flag.clone();
 
     std::thread::spawn(move || {
-        let mut buffer: Vec<u8> = Vec::with_capacity(32000); // ~1 sec at 16kHz s16le
-        let batch_interval = std::time::Duration::from_millis(200);
+        let mut buffer: Vec<u8> = Vec::with_capacity(16000);
+        let batch_interval = std::time::Duration::from_millis(100);
         let mut last_flush = std::time::Instant::now();
 
         loop {
@@ -156,8 +156,8 @@ pub fn start_capture_to_pipeline(
     let stop_flag_clone = stop_flag.clone();
 
     std::thread::spawn(move || {
-        let mut buffer: Vec<u8> = Vec::with_capacity(32000);
-        let batch_interval = std::time::Duration::from_millis(200);
+        let mut buffer: Vec<u8> = Vec::with_capacity(16000);
+        let batch_interval = std::time::Duration::from_millis(100);
         let mut last_flush = std::time::Instant::now();
 
         loop {
